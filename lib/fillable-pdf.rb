@@ -27,6 +27,26 @@ class FillablePDF
 
 
   ##
+  # Determines whether the form has any fields.
+  #
+  #   @return true if form has fields, false otherwise
+  #
+  def has_fields?
+    num_fields > 0
+  end
+
+
+  ##
+  # Returns the total number of form fields.
+  #
+  #   @return the number of fields
+  #
+  def num_fields
+    @form_fields.getFields.size
+  end
+
+
+  ##
   # Retrieves the value of a field given its unique field name.
   #
   #   @param [String] key the field name
