@@ -22,7 +22,7 @@ Or install it yourself as:
 If you are using this gem in a script, you need to require it manually:
 
 ```ruby
-require 'fillable-xml'
+require 'fillable-pdf'
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ pdf = FillablePDF.new('input.pdf')
 An instance of `FillablePDF` has the following methods at its disposal:
 
 ```ruby
-pdf.has_fields? # returns true if the form has any fillable fields
+pdf.any_fields? # returns true if the form has any fillable fields
 
 pdf.num_fields # get the total number of fillable form fields
 
@@ -44,7 +44,7 @@ pdf.get_field('full_name') # retrieve a single field value by field name
 
 pdf.set_field('first_name', 'Richard') # set a single field
 
-pdf.set_fields({first_name: 'Richard', last_name: 'Rahl'}) # set multiple fields
+pdf.set_fields(first_name: 'Richard', last_name: 'Rahl') # set multiple fields
 ```
 
 Once the PDF is filled out you can either overwrite it or save it as another file:
