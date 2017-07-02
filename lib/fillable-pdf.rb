@@ -2,16 +2,13 @@ require 'rjb'
 require 'securerandom'
 
 # http://github.com/itext/itextpdf/releases/latest
-Rjb::load(File.expand_path('../ext/itextpdf-5.5.9.jar', __dir__))
-
+Rjb.load(File.expand_path('../ext/itext5-itextpdf-5.5.11.jar', __dir__))
 
 class FillablePDF
-
   # required Java imports
-  BYTE_STREAM = Rjb::import('java.io.ByteArrayOutputStream')
-  FILE_READER = Rjb::import('com.itextpdf.text.pdf.PdfReader')
-  PDF_STAMPER = Rjb::import('com.itextpdf.text.pdf.PdfStamper')
-
+  BYTE_STREAM = Rjb.import('java.io.ByteArrayOutputStream')
+  FILE_READER = Rjb.import('com.itextpdf.text.pdf.PdfReader')
+  PDF_STAMPER = Rjb.import('com.itextpdf.text.pdf.PdfStamper')
 
   ##
   # Opens a given fillable PDF file and prepares it for modification.
@@ -19,22 +16,20 @@ class FillablePDF
   #   @param [String] file the name of the PDF file or file path
   #
   def initialize(file)
-    @file    = file
+    @file = file
     @byte_stream = BYTE_STREAM.new
     @pdf_stamper = PDF_STAMPER.new FILE_READER.new(@file), @byte_stream
     @form_fields = @pdf_stamper.getAcroFields
   end
-
 
   ##
   # Determines whether the form has any fields.
   #
   #   @return true if form has fields, false otherwise
   #
-  def has_fields?
+  def any_fields?
     num_fields > 0
   end
-
 
   ##
   # Returns the total number of form fields.
@@ -44,7 +39,6 @@ class FillablePDF
   def num_fields
     @form_fields.getFields.size
   end
-
 
   ##
   # Retrieves the value of a field given its unique field name.
@@ -57,7 +51,6 @@ class FillablePDF
     @form_fields.getField key.to_s
   end
 
-
   ##
   # Sets the value of a field given its unique field name and value.
   #
@@ -68,7 +61,6 @@ class FillablePDF
     @form_fields.setField key.to_s, value.to_s
   end
 
-
   ##
   # Sets the values of multiple fields given a set of unique field names and values.
   #
@@ -77,7 +69,6 @@ class FillablePDF
   def set_fields(fields)
     fields.each { |key, value| set_field key, value }
   end
-
 
   ##
   # Overwrites the previously opened PDF file and flattens it if requested.
@@ -90,7 +81,6 @@ class FillablePDF
     File.rename tmp_file, @file
   end
 
-
   ##
   # Saves the filled out PDF file with a given file and flattens it if requested.
   #
@@ -98,9 +88,8 @@ class FillablePDF
   #   @param [bool] flatten true if PDF should be flattened, false otherwise
   #
   def save_as(file, flatten = false)
-    File.open(file, 'wb') { |f| f.write finalize flatten and f.close }
+    File.open(file, 'wb') { |f| f.write(finalize(flatten)) && f.close }
   end
-
 
   private
 
@@ -114,5 +103,4 @@ class FillablePDF
     @pdf_stamper.close
     @byte_stream.toByteArray
   end
-
 end
