@@ -1,8 +1,7 @@
-require 'rjb'
+require_relative 'fillable-pdf/itext'
+require_relative 'field'
 require 'securerandom'
 
-# http://github.com/itext/itextpdf/releases/latest
-Rjb.load(File.expand_path('../ext/itext5-itextpdf-5.5.11.jar', __dir__))
 
 class FillablePDF
   # required Java imports
@@ -19,7 +18,7 @@ class FillablePDF
     @file = file
     @byte_stream = BYTE_STREAM.new
     @pdf_stamper = PDF_STAMPER.new FILE_READER.new(@file), @byte_stream
-    @form_fields = @pdf_stamper.getAcroFields
+    @acro_fields = @pdf_stamper.getAcroFields
   end
 
   ##
@@ -37,7 +36,7 @@ class FillablePDF
   #   @return the number of fields
   #
   def num_fields
-    @form_fields.getFields.size
+    @acro_fields.getFields.size
   end
 
   ##
@@ -48,7 +47,33 @@ class FillablePDF
   #   @return the value of the field
   #
   def get_field(key)
-    @form_fields.getField key.to_s
+    @acro_fields.getField key.to_s
+  end
+
+  ##
+  # Retrieves the numeric type of a field given its unique field name.
+  #
+  #   @param [String] key the field name
+  #
+  #   @return the type of the field
+  #
+  def get_field_type(key)
+    @acro_fields.getFieldType key.to_s
+  end
+
+  ##
+  # Retrieves a hash of all fields and their values.
+  #
+  #   @return the hash of field keys and values
+  #
+  def get_fields
+    iterator = @acro_fields.getFields.keySet.iterator
+    map = {}
+    while iterator.hasNext
+      key = iterator.next.toString
+      map[key.to_sym] = get_field key
+    end
+    map
   end
 
   ##
@@ -58,7 +83,7 @@ class FillablePDF
   #   @param [String] value the field value
   #
   def set_field(key, value)
-    @form_fields.setField key.to_s, value.to_s
+    @acro_fields.setField key.to_s, value.to_s
   end
 
   ##
@@ -68,6 +93,49 @@ class FillablePDF
   #
   def set_fields(fields)
     fields.each { |key, value| set_field key, value }
+  end
+
+  ##
+  # Renames a field given its unique field name and the new field name.
+  #
+  #   @param [String] old_key the field name
+  #   @param [String] new_key the field name
+  #
+  def rename_field(old_key, new_key)
+    @acro_fields.renameField old_key.to_s, new_key.to_s
+  end
+
+  ##
+  # Removes a field from the document given its unique field name.
+  #
+  #   @param [String] key the field name
+  #
+  def remove_field(key)
+    @acro_fields.removeField key.to_s
+  end
+
+  ##
+  # Returns a list of all field keys used in the document.
+  #
+  #   @return array of field names
+  #
+  def keys
+    iterator = @acro_fields.getFields.keySet.iterator
+    set = []
+    set << iterator.next.toString.to_sym while iterator.hasNext
+    set
+  end
+
+  ##
+  # Returns a list of all field values used in the document.
+  #
+  #   @return array of field values
+  #
+  def values
+    iterator = @acro_fields.getFields.keySet.iterator
+    set = []
+    set << get_field(iterator.next.toString) while iterator.hasNext
+    set
   end
 
   ##
