@@ -39,15 +39,21 @@ An instance of `FillablePDF` has the following methods at its disposal:
 # return true if the form has any fillable fields
 # output example: true
 pdf.any_fields?
+```
 
+```ruby
 # get the total number of fillable form fields
 # output example: 10
 pdf.num_fields
+```
 
+```ruby
 # retrieve a single field value by field name
 # output example: 'Richard'
 pdf.get_field(:full_name)
+```
 
+```ruby
 # retrieve a numeric field type by field value
 # numeric types should 
 # output example: 4
@@ -62,32 +68,46 @@ Field::PUSHBUTTON
 Field::RADIOBUTTON
 Field::SIGNATURE
 Field::TEXT
+```
 
+```ruby
 # retrieve a hash of field name and values
 # output example: {:last_name=>"Rahl", :first_name=>"Richard"}
 pdf.get_fields
+```
 
+```ruby
 # set the value of a single field by field name
 # result: changes the value of 'first_name' to 'Richard'
 pdf.set_field(:first_name, 'Richard')
+```
 
+```ruby
 # set the values of multiple fields by field names
 # result: changes the values of 'first_name' and 'last_name'
 pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
+```
 
+```ruby
 # rename field (i.e. change the name of the field)
 # this action also moves the field to the end of the hash 
 # result: renames field name 'last_name' to 'surname'
 pdf.rename_field(:last_name, :surname)
+```
 
+```ruby
 # remove field (i.e. delete field and its value)
 # result: physically removes field 'last_name' from document
 pdf.remove_field(:last_name)
+```
 
+```ruby
 # get an array of all field names in the document
 # output example: [:first_name, :last_name]
 pdf.keys
+```
 
+```ruby
 # get an array of all field values in the document
 # output example: ["Rahl", "Richard"]
 pdf.values
