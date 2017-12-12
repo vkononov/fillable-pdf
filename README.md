@@ -7,6 +7,11 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
 ## Installation
 
+**Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).**
+ 
+*  OSX: `/Library/Java/JavaVirtualMachines/jdk-9.0.1.jdk/Contents/Home`
+* Ubuntu/CentOS: `/usr/lib/jvm/java-1.8.0-openjdk`
+
 Add this line to your application's Gemfile:
 
     gem 'fillable-pdf'
