@@ -19,12 +19,12 @@ pdf.set_fields(football: 'Yes', baseball: 'Yes',
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 
 # list of fields
-puts "Fields hash: #{pdf.get_fields}"
+puts "Fields hash: #{pdf.fields}"
 
 puts
 
-# list of field keys
-puts "Keys: #{pdf.keys}"
+# list of field names
+puts "Keys: #{pdf.names}"
 
 puts
 
@@ -34,10 +34,10 @@ puts "Values: #{pdf.values}"
 puts
 
 # Checking field type
-if pdf.get_field_type(:football) == Field::CHECKBOX
-  puts "Field 'football' is of type CHECKBOX"
+if pdf.field_type(:football) == Field::BUTTON
+  puts "Field 'football' is of type BUTTON"
 else
-  puts "Field 'football' is not of type CHECKBOX"
+  puts "Field 'football' is not of type BUTTON"
 end
 
 puts
@@ -45,19 +45,20 @@ puts
 # Renaming field
 pdf.rename_field :last_name, :surname
 puts "Renamed field 'last_name' to 'surname'"
-puts "New keys: #{pdf.keys}"
 
 puts
 
 # Removing field
 pdf.remove_field :nascar
 puts "Removed field 'nascar'"
-puts "New keys: #{pdf.keys}"
-
 puts
 
 # printing the name of the person used inside the PDF
-puts "Signatory: #{pdf.get_field(:first_name)} #{pdf.get_field(:last_name)}"
+puts "Signatory: #{pdf.field(:first_name)} #{pdf.field(:last_name)}"
 
-# saving the filled out PDF in another file and making it non-editable
-pdf.save_as('output.pdf', true)
+# saving the filled out PDF in another file
+pdf.save_as('output.pdf')
+
+# saving another copy of the filled out PDF in another file and making it non-editable
+pdf = FillablePDF.new('output.pdf')
+pdf.save_as 'output.flat.pdf', flatten: true

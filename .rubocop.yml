@@ -1,0 +1,35 @@
+require:
+  - rubocop-performance
+
+AllCops:
+  Exclude:
+    - .git/**/*
+
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: false
+
+Metrics/LineLength:
+  Exclude:
+    - fillable-pdf.gemspec
+  Max: 120
+
+Naming/AccessorMethodName:
+  Enabled: false
+
+Naming/FileName:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/MutableConstant:
+  Enabled: false
