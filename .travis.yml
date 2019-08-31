@@ -4,4 +4,7 @@ language: ruby
 cache: bundler
 rvm:
   - 2.6.4
-before_install: gem install bundler -v 2.0.2
+jdk:
+  - openjdk8
+before_install:
+  - gem install bundler -v 2.0.2
