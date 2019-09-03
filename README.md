@@ -5,10 +5,6 @@
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms. 
 
-## Known Bugs (Rails + Passenger Phusion only)
-
-if you are using Rails and hosting the app with Passenger Phusion (be it standalone or as a plugin for Apache or Nginx), the Java code within this gem simply hangs without any errors and warnings. If you need to deploy your Rails application, do not use Passenger Phusion. I have tested Puma, and it works fine. Not sure about other webservers.
-
 ## Installation
 
 **Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).**
