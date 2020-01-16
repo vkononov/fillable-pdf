@@ -8,13 +8,13 @@ AllCops:
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 
-Layout/SpaceInsideHashLiteralBraces:
-  Enabled: false
-
-Metrics/LineLength:
+Layout/LineLength:
   Exclude:
     - fillable-pdf.gemspec
   Max: 120
+
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: false
 
 Naming/AccessorMethodName:
   Enabled: false

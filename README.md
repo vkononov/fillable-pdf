@@ -1,3 +1,4 @@
+
 # FillablePDF
 
 [![Gem Version](https://badge.fury.io/rb/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
@@ -38,97 +39,126 @@ First of all, you should open a fillable PDF file:
 pdf = FillablePDF.new 'input.pdf'
 ```
 
+> **Always remember to close your document once you're finished working with it in order to avoid memory leaks:**
+
+```ruby
+pdf.close
+```
+
+## Instance Methods
+
 An instance of `FillablePDF` has the following methods at its disposal:
 
-```ruby
-fillable-pdf
-# output example: true
-pdf.any_fields?
-```
+* `any_fields?`
+	*Determines whether the form has any fields.*
+	```ruby
+	pdf.any_fields?
+	# output example: true
+	```
 
-```ruby
-# get the total number of fillable form fields
-# output example: 10
-pdf.num_fields
-```
+* `num_fields`
+	*Returns the total number of fillable form fields.*
+	```ruby
+	# output example: 10
+	pdf.num_fields
+	```
 
-```ruby
-# retrieve a single field value by field name
-# output example: 'Richard'
-pdf.field(:full_name)
-```
+* `field`
+	*Retrieves the value of a field given its unique field name.*
+	```ruby
+	pdf.field(:full_name)
+	# output example: 'Richard'
+	```
 
-```ruby
-# retrieve a field type by field name
-# numeric types should 
-# output example: 4
-pdf.field_type(:football)
+* `field_type`
+	*Retrieves the numeric type of a field given its unique field name.*
+	```ruby
+	pdf.field_type(:football)
+	# output example: 4
 
-# list of all field types
-Field::BUTTON
-Field::CHOICE
-Field::SIGNATURE
-Field::TEXT
-```
+	# list of all field types
+	Field::BUTTON
+	Field::CHOICE
+	Field::SIGNATURE
+	Field::TEXT
+	```
 
-```ruby
-# retrieve a hash of field name and values
-# output example: {:last_name=>"Rahl", :first_name=>"Richard"}
-pdf.fields
-```
+* `fields`
+	*Retrieves a hash of all fields and their values.*
+	```ruby
+	pdf.fields
+	# output example: {first_name: "Richard", last_name: "Rahl"}
+	```
 
-```ruby
-# set the value of a single field by field name
-# result: changes the value of 'first_name' to 'Richard'
-pdf.set_field(:first_name, 'Richard')
-```
+* `set_field`
+	*Sets the value of a field given its unique field name and value.*
+	```ruby
+	pdf.set_field(:first_name, 'Richard')
+	# result: changes the value of 'first_name' to 'Richard'
+	```
 
-```ruby
-# set the values of multiple fields by field names
-# result: changes the values of 'first_name' and 'last_name'
-pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
-```
+* `set_fields`
+	*Sets the values of multiple fields given a set of unique field names and values.*
+	```ruby
+	pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
+	# result: changes the values of 'first_name' and 'last_name'
+	```
 
-```ruby
-# rename field (i.e. change the name of the field)
-# result: renames field name 'last_name' to 'surname'
-# NOTE: this action does not take effect until the document is saved 
-pdf.rename_field(:last_name, :surname)
-```
+* `rename_field`
+	*Renames a field given its unique field name and the new field name.*
+	```ruby
+	pdf.rename_field(:last_name, :surname)
+	# result: renames field name 'last_name' to 'surname'
+	# NOTE: this action does not take effect until the document is saved 
+	```
 
-```ruby
-# remove field (i.e. delete field and its value)
-# result: physically removes field 'last_name' from document
-pdf.remove_field(:last_name)
-```
+* `remove_field`
+	*Removes a field from the document given its unique field name.*
+	```ruby
+	pdf.remove_field(:last_name)
+	# result: physically removes field 'last_name' from document
+	```
 
-```ruby
-# get an array of all field names in the document
-# output example: [:first_name, :last_name]
-pdf.names
-```
+* `names`
+	*Returns a list of all field keys used in the document.*
+	```ruby
+	pdf.names
+	# output example: [:first_name, :last_name]
+	```
 
-```ruby
-# get an array of all field values in the document
-# output example: ["Rahl", "Richard"]
-pdf.values
-```
+* `values`
+	*Returns a list of all field values used in the document.*
+	```ruby
+	pdf.values
+	# output example: ["Rahl", "Richard"]
+	```
 
-Once the PDF is filled out you can either overwrite it or save it as another file:
+* `save`
+	*Overwrites the previously opened PDF document and flattens it if requested.*
+	```ruby
+	pdf.save
+	# result: document is saved without flatenning
+	pdf.save_as(flatten: true)
+	# result: document is saved with flatenning
+	```
 
-```ruby
-pdf.save
-pdf.save_as('output.pdf')
-```
+* `save_as`
+	*Saves the filled out PDF document in a given path and flattens it if requested.*
+	```ruby
+	pdf.save_as('output.pdf')
+	# result: document is saved in a given path without flatenning
+	pdf.save_as('output.pdf', flatten: true)
+	# result: document is saved in a given path with flatenning
+	```
 
-Or if you prefer to flatten the file (i.e. make it non-editable), you can instead use:
+	**NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy. 
 
-```ruby
-pdf.save(flatten: true)
-pdf.save_as('output.pdf', flatten: true)
-```
-
-**NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy. 
+* `close`
+	*Closes the PDF document discarding all unsaved changes.*
+	```ruby
+	pdf.close
+	# result: document is closed
+	```
 
 ## Example
 
@@ -199,6 +229,9 @@ pdf.save_as('output.pdf')
 # saving another copy of the filled out PDF in another file and making it non-editable
 pdf = FillablePDF.new('output.pdf')
 pdf.save_as 'output.flat.pdf', flatten: true
+
+# closing the document
+pdf.close
 ```
 
 The example above produces the following output and also generates the output file [output.pdf](example/output.pdf).

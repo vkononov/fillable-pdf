@@ -48,6 +48,11 @@ class PdfTest < Minitest::Test
     assert_equal 'Richard', @pdf.field(:first_name)
   end
 
+  def test_that_an_asian_font_works
+    @pdf.set_field(:first_name, '理查德')
+    assert_equal '理查德', @pdf.field(:first_name)
+  end
+
   def test_that_multiple_field_values_can_be_modified
     @pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
     assert_equal 'Richard', @pdf.field(:first_name)
@@ -87,5 +92,9 @@ class PdfTest < Minitest::Test
     @pdf = FillablePDF.new(@tmp)
     @pdf.save
     refute_nil FillablePDF.new(@tmp)
+  end
+
+  def test_that_a_file_can_be_closed
+    assert @pdf.close
   end
 end

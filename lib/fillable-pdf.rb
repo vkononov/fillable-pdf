@@ -19,12 +19,16 @@ class FillablePDF
   def initialize(file_path)
     raise IOError, "File at `#{file_path}' is not found" unless File.exist?(file_path)
     @file_path = file_path
-    @byte_stream = BYTE_STREAM.new
-    @pdf_reader = PDF_READER.new @file_path
-    @pdf_writer = PDF_WRITER.new @byte_stream
-    @pdf_doc = PDF_DOCUMENT.new @pdf_reader, @pdf_writer
-    @pdf_form = PDF_ACRO_FORM.getAcroForm(@pdf_doc, true)
-    @form_fields = @pdf_form.getFormFields
+    begin
+      @byte_stream = BYTE_STREAM.new
+      @pdf_reader = PDF_READER.new @file_path
+      @pdf_writer = PDF_WRITER.new @byte_stream
+      @pdf_doc = PDF_DOCUMENT.new @pdf_reader, @pdf_writer
+      @pdf_form = PDF_ACRO_FORM.getAcroForm(@pdf_doc, true)
+      @form_fields = @pdf_form.getFormFields
+    rescue StandardError => ex
+      raise "#{ex.message} (input file may be corrupt, incompatible, or may not have any forms)"
+    end
   end
 
   ##
@@ -37,7 +41,7 @@ class FillablePDF
   end
 
   ##
-  # Returns the total number of form fields.
+  # Returns the total number of fillable form fields.
   #
   #   @return the number of fields
   #
@@ -147,7 +151,7 @@ class FillablePDF
   end
 
   ##
-  # Overwrites the previously opened PDF file and flattens it if requested.
+  # Overwrites the previously opened PDF document and flattens it if requested.
   #
   #   @param [bool] flatten true if PDF should be flattened, false otherwise
   #
@@ -158,13 +162,27 @@ class FillablePDF
   end
 
   ##
-  # Saves the filled out PDF file with a given file and flattens it if requested.
+  # Saves the filled out PDF document in a given path and flattens it if requested.
   #
   #   @param [String] file_path the name of the PDF file or file path
   #   @param [Hash] flatten: true if PDF should be flattened, false otherwise
   #
   def save_as(file_path, flatten: false)
-    File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+    if @file_path == file_path
+      save(flatten: flatten)
+    else
+      File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+    end
+  end
+
+  ##
+  # Closes the PDF document discarding all unsaved changes.
+  #
+  # @return [Boolean] true if document is closed, false otherwise
+  #
+  def close
+    @pdf_doc.close
+    @pdf_doc.isClosed
   end
 
   private
@@ -176,7 +194,7 @@ class FillablePDF
   #
   def finalize(flatten: false)
     @pdf_form.flattenFields if flatten
-    @pdf_doc.close
+    close
     @byte_stream.toByteArray
   end
 

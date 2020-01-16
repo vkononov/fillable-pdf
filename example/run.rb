@@ -1,4 +1,4 @@
-require 'fillable-pdf'
+require_relative '../lib/fillable-pdf'
 
 # opening a fillable PDF
 pdf = FillablePDF.new('input.pdf')
@@ -62,3 +62,6 @@ pdf.save_as('output.pdf')
 # saving another copy of the filled out PDF in another file and making it non-editable
 pdf = FillablePDF.new('output.pdf')
 pdf.save_as 'output.flat.pdf', flatten: true
+
+# closing the document
+pdf.close
