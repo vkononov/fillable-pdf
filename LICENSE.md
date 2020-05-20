@@ -1,3 +1,7 @@
+The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+However, you must also adhere to the [iText License](https://github.com/itext/itext7) when using this gem in your project.
+
 The MIT License (MIT)
 
 Copyright (c) 2016 Vadim Kononov
