@@ -6,6 +6,18 @@
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms. 
 
+## Known Issues
+
+If the gem hangs in `development`, removing the following gems may fix the issue:
+
+```ruby
+gem 'spring'
+gem 'spring-watcher-listen'
+```
+
+If the gem hangs in `production`, you could try to use `puma` with a reverse proxy to host the application.
+
+
 ## Installation
 
 **Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).**
