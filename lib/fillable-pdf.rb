@@ -27,8 +27,8 @@ class FillablePDF
       @pdf_doc = PDF_DOCUMENT.new @pdf_reader, @pdf_writer
       @pdf_form = PDF_ACRO_FORM.getAcroForm(@pdf_doc, true)
       @form_fields = @pdf_form.getFormFields
-    rescue StandardError => ex
-      raise "#{ex.message} (input file may be corrupt, incompatible, or may not have any forms)"
+    rescue StandardError => e
+      raise "#{e.message} (input file may be corrupt, incompatible, or may not have any forms)"
     end
   end
 

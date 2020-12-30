@@ -1,7 +1,10 @@
 require:
+  - rubocop-minitest
   - rubocop-performance
+  - rubocop-rake
 
 AllCops:
+  NewCops: enable
   Exclude:
     - .git/**/*
 
@@ -15,6 +18,9 @@ Layout/LineLength:
 
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: false
+
+Metrics/MethodLength:
+  Max: 12
 
 Naming/AccessorMethodName:
   Enabled: false

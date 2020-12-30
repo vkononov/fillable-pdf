@@ -6,7 +6,7 @@ class Field
   # between these constants and tries to create the same constant ("A") for both, which causes
   # an annoying warning "already initialized constant Rjb::Com_itextpdf_kernel_pdf_PdfName::A".
   # As long as RJB has not fixed this issue, this warning will remain suppressed.
-  suppress_warnings { PDF_NAME = Rjb.import('com.itextpdf.kernel.pdf.PdfName') }
+  suppress_warnings { PDF_NAME = Rjb.import('com.itextpdf.kernel.pdf.PdfName') } # rubocop:disable Lint/ConstantDefinitionInBlock
 
   BUTTON = PDF_NAME.Btn.toString
   CHOICE = PDF_NAME.Ch.toString
