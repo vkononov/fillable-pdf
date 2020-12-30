@@ -1,5 +1,6 @@
 require_relative 'fillable-pdf/itext'
 require_relative 'field'
+require 'fileutils'
 require 'securerandom'
 
 class FillablePDF
@@ -158,7 +159,7 @@ class FillablePDF
   def save(flatten: false)
     tmp_file = SecureRandom.uuid
     save_as(tmp_file, flatten: flatten)
-    File.rename tmp_file, @file_path
+    FileUtils.mv tmp_file, @file_path
   end
 
   ##
