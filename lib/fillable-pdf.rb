@@ -12,6 +12,8 @@ class FillablePDF
   PDF_ACRO_FORM = Rjb.import 'com.itextpdf.forms.PdfAcroForm'
   PDF_FORM_FIELD = Rjb.import 'com.itextpdf.forms.fields.PdfFormField'
 
+
+
   ##
   # Opens a given fillable-pdf PDF file and prepares it for modification.
   #
@@ -23,6 +25,7 @@ class FillablePDF
     begin
       @byte_stream = BYTE_STREAM.new
       @pdf_reader = PDF_READER.new @file_path
+      @pdf_reader.setUnethicalReading(true);
       @pdf_writer = PDF_WRITER.new @byte_stream
       @pdf_doc = PDF_DOCUMENT.new @pdf_reader, @pdf_writer
       @pdf_form = PDF_ACRO_FORM.getAcroForm(@pdf_doc, true)
