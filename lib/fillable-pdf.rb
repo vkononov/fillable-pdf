@@ -22,7 +22,7 @@ class FillablePDF
     @file_path = file_path
     begin
       @byte_stream = BYTE_STREAM.new
-      @pdf_reader = PDF_READER.new @file_path
+      @pdf_reader = PDF_READER.new @file_path.to_s
       @pdf_writer = PDF_WRITER.new @byte_stream
       @pdf_doc = PDF_DOCUMENT.new @pdf_reader, @pdf_writer
       @pdf_form = PDF_ACRO_FORM.getAcroForm(@pdf_doc, true)
