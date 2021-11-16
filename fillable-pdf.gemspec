@@ -31,4 +31,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop-rake'
 
   spec.add_runtime_dependency 'rjb', '1.6.2'
+
+  spec.metadata = {
+    'rubygems_mfa_required' => 'true'
+  }
 end
