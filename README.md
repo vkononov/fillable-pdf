@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
 [![Build Status](https://api.travis-ci.org/vkononov/fillable-pdf.svg?branch=master)](http://travis-ci.org/vkononov/fillable-pdf)
 
-FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms. 
+FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.
 
 ## Known Issues
 
@@ -21,8 +21,8 @@ If the gem hangs in `production`, you could try to use `puma` with a reverse pro
 ## Installation
 
 **Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).**
- 
-* OSX: `/Library/Java/JavaVirtualMachines/jdk-12.0.2.jdk/Contents/Home`  
+
+* OSX: `/Library/Java/JavaVirtualMachines/jdk-12.0.2.jdk/Contents/Home`
 * Ubuntu/CentOS: `/usr/lib/jvm/java-1.8.0-openjdk`
 
 Add this line to your application's Gemfile:
@@ -147,7 +147,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
 	```ruby
 	pdf.rename_field(:last_name, :surname)
 	# result: renames field name 'last_name' to 'surname'
-	# NOTE: this action does not take effect until the document is saved 
+	# NOTE: this action does not take effect until the document is saved
 	```
 
 * `remove_field`
@@ -189,7 +189,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
 	# result: document is saved in a given path with flatenning
 	```
 
-	**NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy. 
+	**NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy.
 
 * `close`
 	*Closes the PDF document discarding all unsaved changes.*
