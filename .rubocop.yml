@@ -15,6 +15,14 @@ Gemspec/RequiredRubyVersion:
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 
+Layout/IndentationConsistency:
+  Exclude:
+    - README.md
+
+Layout/InitialIndentation:
+  Exclude:
+    - README.md
+
 Layout/LineLength:
   Exclude:
     - fillable-pdf.gemspec
