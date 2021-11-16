@@ -17,6 +17,8 @@ pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
 pdf.set_fields(football: 'Yes', baseball: 'Yes',
                basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
+pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
+pdf.set_field(:language, 'dart') # select a radio button option
 
 # list of fields
 puts "Fields hash: #{pdf.fields}"

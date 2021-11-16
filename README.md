@@ -27,7 +27,9 @@ If the gem hangs in `production`, you could try to use `puma` with a reverse pro
 
 Add this line to your application's Gemfile:
 
+    ```ruby
     gem 'fillable-pdf'
+	```
 
 And then execute:
 
@@ -57,7 +59,31 @@ pdf = FillablePDF.new 'input.pdf'
 pdf.close
 ```
 
-## Instance Methods
+### Checking / Unchecking Checkboxes
+
+Use the values `'Yes'` and `'Off'` to check and uncheck checkboxes, respectively. For example:
+
+    pdf.set_field(:newsletter, 'Yes')
+    pdf.set_field(:newsletter, 'Off')
+
+### Checking / Unchecking Radio Buttons
+
+Suppose you have the following a radio button field name `language` with the following options:
+
+  - Ruby (`ruby`)
+  - Python (`python`)
+  - Dart (`dart`)
+  - Other (`other`)
+
+To select one of these options (or change the current option) use:
+
+    pdf.set_field(:language, 'dart')
+
+To unset the radio button use the `'Off'` string:
+
+    pdf.set_field(:language, 'Off')
+
+### Instance Methods
 
 An instance of `FillablePDF` has the following methods at its disposal:
 
@@ -86,13 +112,13 @@ An instance of `FillablePDF` has the following methods at its disposal:
 	*Retrieves the numeric type of a field given its unique field name.*
 	```ruby
 	pdf.field_type(:football)
-	# output example: 4
+	# output example: '/Btn'
 
 	# list of all field types
-	Field::BUTTON
-	Field::CHOICE
-	Field::SIGNATURE
-	Field::TEXT
+	Field::BUTTON ('/Btn')
+	Field::CHOICE ('/Ch')
+	Field::SIGNATURE ('/Sig')
+	Field::TEXT ('/Tx')
 	```
 
 * `fields`
@@ -177,7 +203,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
 The following example [example.rb](example/run.rb) and the input file [input.pdf](example/input.pdf) are located in the `test` directory. It uses all of the methods that are described above and generates the output files [output.pdf](example/output.pdf) and [output.flat.pdf](example/output.flat.pdf).
 
 ```ruby
-require 'fillable-pdf'
+require_relative '../lib/fillable-pdf'
 
 # opening a fillable PDF
 pdf = FillablePDF.new('input.pdf')
@@ -196,6 +222,8 @@ pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
 pdf.set_fields(football: 'Yes', baseball: 'Yes',
                basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
+pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
+pdf.set_field(:language, 'dart') # select a radio button option
 
 # list of fields
 puts "Fields hash: #{pdf.fields}"
@@ -249,13 +277,13 @@ pdf.close
 The example above produces the following output and also generates the output file [output.pdf](example/output.pdf).
 
 ```
-The form has a total of 8 fields.
+The form has a total of 14 fields.
 
-Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :nascar=>"Yes", :hockey=>"Yes", :date=>"August 30, 2019"}
+Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :hockey=>"Yes", :date=>"November 15, 2021", :newsletter=>"Off", :nascar=>"Yes", :language=>"dart", :"language.1"=>"dart", :"language.2"=>"dart", :"language.3"=>"dart", :"language.4"=>"dart"}
 
-Keys: [:last_name, :first_name, :football, :baseball, :basketball, :nascar, :hockey, :date]
+Keys: [:last_name, :first_name, :football, :baseball, :basketball, :hockey, :date, :newsletter, :nascar, :language, :"language.1", :"language.2", :"language.3", :"language.4"]
 
-Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "Yes", "Yes", "August 30, 2019"]
+Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "Yes", "November 15, 2021", "Off", "Yes", "dart", "dart", "dart", "dart", "dart"]
 
 Field 'football' is of type BUTTON
 
