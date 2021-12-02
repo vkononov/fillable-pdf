@@ -3,7 +3,7 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - 3.0.2
+  - 3.0.3
 jdk:
   - openjdk8
 before_install:

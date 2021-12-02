@@ -8,6 +8,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - .git/**/*
+    - vendor/bundle/**/*
 
 Gemspec/RequiredRubyVersion:
   Enabled: false
@@ -25,11 +26,16 @@ Layout/InitialIndentation:
 
 Layout/LineLength:
   Exclude:
+    - README.md
     - fillable-pdf.gemspec
   Max: 120
 
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: false
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - lib/fillable-pdf/itext.rb
 
 Metrics/MethodLength:
   Max: 12

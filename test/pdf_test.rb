@@ -4,6 +4,7 @@ class PdfTest < Minitest::Test
   def setup
     @pdf = FillablePDF.new 'test/files/filled-out.pdf'
     @tmp = 'test/files/tmp.pdf'
+    @base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
   end
 
   def test_that_it_has_a_version_number
@@ -30,7 +31,7 @@ class PdfTest < Minitest::Test
   end
 
   def test_that_hash_can_be_accessed
-    assert_equal 14, @pdf.fields.length
+    assert_equal 16, @pdf.fields.length
   end
 
   def test_that_a_field_value_can_be_accessed_by_name
@@ -46,6 +47,14 @@ class PdfTest < Minitest::Test
   def test_that_a_field_value_can_be_modified
     @pdf.set_field(:first_name, 'Richard')
     assert_equal 'Richard', @pdf.field(:first_name)
+  end
+
+  def test_that_an_image_can_be_placed_in_signature_field
+    assert @pdf.set_image(:signature, 'test/files/signature.png')
+  end
+
+  def test_that_a_base64_can_be_placed_in_photo_field
+    assert @pdf.set_image_base64(:photo, @base64)
   end
 
   def test_that_an_asian_font_works

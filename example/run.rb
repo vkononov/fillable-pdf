@@ -1,5 +1,7 @@
 require_relative '../lib/fillable-pdf'
 
+BASE64_PHOTO = 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==' # rubocop:disable Layout/LineLength
+
 # opening a fillable PDF
 pdf = FillablePDF.new('input.pdf')
 
@@ -14,11 +16,12 @@ puts
 
 # setting form fields
 pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
-pdf.set_fields(football: 'Yes', baseball: 'Yes',
-               basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
+pdf.set_fields(football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
 pdf.set_field(:language, 'dart') # select a radio button option
+pdf.set_image_base64(:photo, BASE64_PHOTO)
+pdf.set_image(:signature, 'signature.png')
 
 # list of fields
 puts "Fields hash: #{pdf.fields}"
@@ -53,10 +56,6 @@ puts
 # Removing field
 pdf.remove_field :nascar
 puts "Removed field 'nascar'"
-puts
-
-# printing the name of the person used inside the PDF
-puts "Signatory: #{pdf.field(:first_name)} #{pdf.field(:last_name)}"
 
 # saving the filled out PDF in another file
 pdf.save_as('output.pdf')

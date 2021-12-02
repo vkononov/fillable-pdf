@@ -2,7 +2,7 @@
 # FillablePDF
 
 [![Gem Version](https://badge.fury.io/rb/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
-[![Build Status](https://api.travis-ci.org/vkononov/fillable-pdf.svg?branch=master)](http://travis-ci.org/vkononov/fillable-pdf)
+[![Build Status](https://app.travis-ci.com/vkononov/fillable-pdf.svg?branch=master)](http://travis-ci.org/vkononov/fillable-pdf)
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.
 
@@ -154,6 +154,14 @@ To unset the radio button use the `'Off'` string:
 pdf.set_field(:language, 'Off')
 ```
 
+### Adding Signatures or Images
+
+Digital signatures are not supported, but you can place an image or a base64 encoded image within the bounds of any form field.
+
+SVG images are not supported. You will have to convert them to a JPG or PNG first.
+
+See methods `set_image` and `set_image_base64` below.
+
 ### Instance Methods
 
 An instance of `FillablePDF` has the following methods at its disposal:
@@ -218,6 +226,22 @@ An instance of `FillablePDF` has the following methods at its disposal:
     ```ruby
     pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
     # result: changes the values of 'first_name' and 'last_name'
+    ```
+
+* `set_image`
+  *Places an image file within the rectangular bounding box of the given form field.*
+
+    ```ruby
+    pdf.set_image(:signature, 'signature.png')
+    # result: the image 'signature.png' is shown in the foreground of the form field
+    ```
+
+* `set_image_base64`
+  *Places a base64 encoded image within the rectangular bounding box of the given form field.*
+
+    ```ruby
+    pdf.set_image_base64(:signature, 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
+    # result: the base64 encoded image is shown in the foreground of the form field
     ```
 
 * `rename_field`
@@ -285,10 +309,12 @@ An instance of `FillablePDF` has the following methods at its disposal:
 
 ## Example
 
-The following example [example.rb](example/run.rb) and the input file [input.pdf](example/input.pdf) are located in the `test` directory. It uses all of the methods that are described above and generates the output files [output.pdf](example/output.pdf) and [output.flat.pdf](example/output.flat.pdf).
+The following [example.rb](example/run.rb) with [input.pdf](example/input.pdf) is located in the [example](example) directory. It uses all of the methods that are described above and generates the output files [output.pdf](example/output.pdf) and [output.flat.pdf](example/output.flat.pdf).
 
 ```ruby
 require_relative '../lib/fillable-pdf'
+
+BASE64_PHOTO = 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==' # rubocop:disable Layout/LineLength
 
 # opening a fillable PDF
 pdf = FillablePDF.new('input.pdf')
@@ -304,11 +330,12 @@ puts
 
 # setting form fields
 pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
-pdf.set_fields(football: 'Yes', baseball: 'Yes',
-               basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
+pdf.set_fields(football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
 pdf.set_field(:language, 'dart') # select a radio button option
+pdf.set_image_base64(:photo, BASE64_PHOTO)
+pdf.set_image(:signature, 'signature.png')
 
 # list of fields
 puts "Fields hash: #{pdf.fields}"
@@ -343,10 +370,6 @@ puts
 # Removing field
 pdf.remove_field :nascar
 puts "Removed field 'nascar'"
-puts
-
-# printing the name of the person used inside the PDF
-puts "Signatory: #{pdf.field(:first_name)} #{pdf.field(:last_name)}"
 
 # saving the filled out PDF in another file
 pdf.save_as('output.pdf')
@@ -362,21 +385,19 @@ pdf.close
 The example above produces the following output and also generates the output file [output.pdf](example/output.pdf).
 
 ```text
-The form has a total of 14 fields.
+The form has a total of 16 fields.
 
-Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :hockey=>"Yes", :date=>"November 15, 2021", :newsletter=>"Off", :nascar=>"Yes", :language=>"dart", :"language.1"=>"dart", :"language.2"=>"dart", :"language.3"=>"dart", :"language.4"=>"dart"}
+Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :hockey=>"Yes", :date=>"November 16, 2021", :newsletter=>"Off", :nascar=>"Yes", :language=>"dart", :"language.1"=>"dart", :"language.2"=>"dart", :"language.3"=>"dart", :"language.4"=>"dart", :signature=>"", :photo=>""}
 
-Keys: [:last_name, :first_name, :football, :baseball, :basketball, :hockey, :date, :newsletter, :nascar, :language, :"language.1", :"language.2", :"language.3", :"language.4"]
+Keys: [:last_name, :first_name, :football, :baseball, :basketball, :hockey, :date, :newsletter, :nascar, :language, :"language.1", :"language.2", :"language.3", :"language.4", :signature, :photo]
 
-Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "Yes", "November 15, 2021", "Off", "Yes", "dart", "dart", "dart", "dart", "dart"]
+Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "Yes", "November 16, 2021", "Off", "Yes", "dart", "dart", "dart", "dart", "dart", "", ""]
 
 Field 'football' is of type BUTTON
 
 Renamed field 'last_name' to 'surname'
 
 Removed field 'nascar'
-
-Signatory: Richard Rahl
 ```
 
 ## Contributing

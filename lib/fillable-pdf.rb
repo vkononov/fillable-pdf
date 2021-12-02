@@ -1,31 +1,24 @@
 require_relative 'fillable-pdf/itext'
 require_relative 'field'
+require 'base64'
 require 'fileutils'
 require 'securerandom'
 
-class FillablePDF
-  # required Java imports
-  BYTE_STREAM = Rjb.import 'com.itextpdf.io.source.ByteArrayOutputStream'
-  PDF_READER = Rjb.import 'com.itextpdf.kernel.pdf.PdfReader'
-  PDF_WRITER = Rjb.import 'com.itextpdf.kernel.pdf.PdfWriter'
-  PDF_DOCUMENT = Rjb.import 'com.itextpdf.kernel.pdf.PdfDocument'
-  PDF_ACRO_FORM = Rjb.import 'com.itextpdf.forms.PdfAcroForm'
-  PDF_FORM_FIELD = Rjb.import 'com.itextpdf.forms.fields.PdfFormField'
-
+class FillablePDF # rubocop:disable Metrics/ClassLength
   ##
   # Opens a given fillable-pdf PDF file and prepares it for modification.
   #
   #   @param [String|Symbol] file_path the name of the PDF file or file path
   #
   def initialize(file_path)
-    raise IOError, "File at `#{file_path}' is not found" unless File.exist?(file_path)
+    raise IOError, "File <#{file_path}> is not found" unless File.exist?(file_path)
     @file_path = file_path
     begin
-      @byte_stream = BYTE_STREAM.new
-      @pdf_reader = PDF_READER.new @file_path.to_s
-      @pdf_writer = PDF_WRITER.new @byte_stream
-      @pdf_doc = PDF_DOCUMENT.new @pdf_reader, @pdf_writer
-      @pdf_form = PDF_ACRO_FORM.getAcroForm(@pdf_doc, true)
+      @byte_stream = ITEXT::ByteArrayOutputStream.new
+      @pdf_reader = ITEXT::PdfReader.new @file_path.to_s
+      @pdf_writer = ITEXT::PdfWriter.new @byte_stream
+      @pdf_doc = ITEXT::PdfDocument.new @pdf_reader, @pdf_writer
+      @pdf_form = ITEXT::PdfAcroForm.getAcroForm(@pdf_doc, true)
       @form_fields = @pdf_form.getFormFields
     rescue StandardError => e
       raise "#{e.message} (input file may be corrupt, incompatible, or may not have any forms)"
@@ -97,6 +90,64 @@ class FillablePDF
   #
   def set_field(key, value)
     pdf_field(key).setValue(value.to_s)
+  end
+
+  ##
+  # Sets an image within the bounds of the given form field. It doesn't matter
+  # what type of form field it is (signature, image, etc). The image will be scaled
+  # to fill the available space while preserving its aspect ratio. All previous
+  # content will be removed, which means you cannot have both text and image.
+  #
+  #   @param [String|Symbol] key the field name
+  #   @param [String|Symbol] file_path the name of the image file or image path
+  #
+  def set_image(key, file_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    raise IOError, "File <#{file_path}> is not found" unless File.exist?(file_path)
+    field = pdf_field(key)
+    widgets = field.getWidgets
+    widget_dict = suppress_warnings { widgets.isEmpty ? field.getPdfObject : widgets.get(0).getPdfObject }
+    orig_rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
+    border_width = field.getBorderWidth
+    bounding_rectangle = ITEXT::Rectangle.new(
+      orig_rect.getWidth - (border_width * 2),
+      orig_rect.getHeight - (border_width * 2)
+    )
+
+    pdf_form_x_object = ITEXT::PdfFormXObject.new(bounding_rectangle)
+    canvas = ITEXT::Canvas.new(pdf_form_x_object, @pdf_doc)
+    image = ITEXT::Image.new(ITEXT::ImageDataFactory.create(file_path.to_s))
+                        .setAutoScale(true)
+                        .setHorizontalAlignment(ITEXT::HorizontalAlignment.CENTER)
+    container = ITEXT::Div.new
+                          .setMargin(border_width).add(image)
+                          .setVerticalAlignment(ITEXT::VerticalAlignment.MIDDLE)
+                          .setFillAvailableArea(true)
+    canvas.add(container)
+    canvas.close
+
+    pdf_dict = ITEXT::PdfDictionary.new
+    widget_dict.put(ITEXT::PdfName.AP, pdf_dict)
+    pdf_dict.put(ITEXT::PdfName.N, pdf_form_x_object.getPdfObject)
+    widget_dict.setModified
+  rescue StandardError => e
+    raise "#{e.message} (there may be something wrong with your image)"
+  end
+
+  ##
+  # Sets an image within the bounds of the given form field. It doesn't matter
+  # what type of form field it is (signature, image, etc). The image will be scaled
+  # to fill the available space while preserving its aspect ratio. All previous
+  # content will be removed, which means you cannot have both text and image.
+  #
+  #   @param [String|Symbol] key the field name
+  #   @param [String|Symbol] base64_image_data base64 encoded data image
+  #
+  def set_image_base64(key, base64_image_data)
+    tmp_file = SecureRandom.uuid
+    File.open(tmp_file, 'wb') { |f| f.write(Base64.decode64(base64_image_data)) }
+    set_image(key, tmp_file)
+  ensure
+    FileUtils.rm tmp_file
   end
 
   ##
