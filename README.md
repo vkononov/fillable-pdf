@@ -18,6 +18,7 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
     gem 'spring-watcher-listen'
     ```
 
+3. Read-only, write-protected or encrypted PDF files are currently not supported.
 
 ## Deployment with Heroku
 

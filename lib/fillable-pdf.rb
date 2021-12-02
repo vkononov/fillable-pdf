@@ -21,7 +21,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       @pdf_form = ITEXT::PdfAcroForm.getAcroForm(@pdf_doc, true)
       @form_fields = @pdf_form.getFormFields
     rescue StandardError => e
-      raise "#{e.message} (input file may be corrupt, incompatible, or may not have any forms)"
+      raise "#{e.message} (Input file may be corrupt, incompatible, read-only, write-protected, encrypted, or may not have any form fields)" # rubocop:disable Layout/LineLength
     end
   end
 
