@@ -4,6 +4,7 @@ class PdfTest < Minitest::Test
   def setup
     @pdf = FillablePDF.new 'test/files/filled-out.pdf'
     @tmp = 'test/files/tmp.pdf'
+    @base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
   end
 
   def test_that_it_has_a_version_number
@@ -30,7 +31,7 @@ class PdfTest < Minitest::Test
   end
 
   def test_that_hash_can_be_accessed
-    assert_equal 8, @pdf.fields.length
+    assert_equal 16, @pdf.fields.length
   end
 
   def test_that_a_field_value_can_be_accessed_by_name
@@ -48,6 +49,14 @@ class PdfTest < Minitest::Test
     assert_equal 'Richard', @pdf.field(:first_name)
   end
 
+  def test_that_an_image_can_be_placed_in_signature_field
+    assert @pdf.set_image(:signature, 'test/files/signature.png')
+  end
+
+  def test_that_a_base64_can_be_placed_in_photo_field
+    assert @pdf.set_image_base64(:photo, @base64)
+  end
+
   def test_that_an_asian_font_works
     @pdf.set_field(:first_name, '理查德')
     assert_equal '理查德', @pdf.field(:first_name)
@@ -57,6 +66,20 @@ class PdfTest < Minitest::Test
     @pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
     assert_equal 'Richard', @pdf.field(:first_name)
     assert_equal 'Rahl', @pdf.field(:last_name)
+  end
+
+  def test_that_a_checkbox_can_be_checked_and_unchecked
+    @pdf.set_field(:nascar, 'Yes')
+    assert_equal 'Yes', @pdf.field(:nascar)
+    @pdf.set_field(:newsletter, 'Off')
+    assert_equal 'Off', @pdf.field(:newsletter)
+  end
+
+  def test_that_a_radio_button_can_be_checked_and_unchecked
+    @pdf.set_field(:language, 'ruby')
+    3.times { |i| assert_equal 'ruby', @pdf.field("language.#{i}".gsub('.0', '')) }
+    @pdf.set_field(:language, 'Off')
+    3.times { |i| assert_equal 'Off', @pdf.field("language.#{i}".gsub('.0', '')) }
   end
 
   def test_that_a_field_can_be_renamed

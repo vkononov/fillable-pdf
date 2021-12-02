@@ -1,20 +1,44 @@
 require:
+  - rubocop-md
+  - rubocop-minitest
   - rubocop-performance
+  - rubocop-rake
 
 AllCops:
+  NewCops: enable
   Exclude:
     - .git/**/*
+    - vendor/bundle/**/*
+
+Gemspec/RequiredRubyVersion:
+  Enabled: false
 
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 
+Layout/IndentationConsistency:
+  Exclude:
+    - README.md
+
+Layout/InitialIndentation:
+  Exclude:
+    - README.md
+
 Layout/LineLength:
   Exclude:
+    - README.md
     - fillable-pdf.gemspec
   Max: 120
 
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: false
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - lib/fillable-pdf/itext.rb
+
+Metrics/MethodLength:
+  Max: 12
 
 Naming/AccessorMethodName:
   Enabled: false
