@@ -144,7 +144,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   def set_image_base64(key, base64_image_data)
     tmp_file = SecureRandom.uuid
-    File.open(tmp_file, 'wb') { |f| f.write(Base64.decode64(base64_image_data)) }
+    File.binwrite(tmp_file, Base64.decode64(base64_image_data))
     set_image(key, tmp_file)
   ensure
     FileUtils.rm tmp_file
