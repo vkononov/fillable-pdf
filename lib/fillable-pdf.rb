@@ -10,7 +10,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [String|Symbol] file_path the name of the PDF file or file path
   #
-  def initialize(file_path)
+  def initialize(file_path) # rubocop:disable Metrics/MethodLength
     raise IOError, "File <#{file_path}> is not found" unless File.exist?(file_path)
     @file_path = file_path
     begin
@@ -20,6 +20,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       @pdf_doc = ITEXT::PdfDocument.new @pdf_reader, @pdf_writer
       @pdf_form = ITEXT::PdfAcroForm.getAcroForm(@pdf_doc, true)
       @form_fields = @pdf_form.getFormFields
+      @pdf_form.setGenerateAppearance false
     rescue StandardError => e
       raise "#{e.message} (Input file may be corrupt, incompatible, read-only, write-protected, encrypted, or may not have any form fields)" # rubocop:disable Layout/LineLength
     end
