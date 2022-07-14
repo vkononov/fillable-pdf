@@ -20,72 +20,15 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
 3. Read-only, write-protected or encrypted PDF files are currently not supported.
 
-## Deployment with Heroku
-
-When deploying to Heroku, be sure to install the following build packs (in this order):
-
-```bash
-heroku buildpacks:add heroku/jvm
-heroku buildpacks:add heroku/ruby
-```
-
-## Deployment with Phusion Passenger + Nginx
-
-The way the gem is currently built makes it [fundamentally incompatible](https://github.com/phusion/passenger/issues/223#issuecomment-44504029) with Phusion Passenger's [smart spawning](https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#the-smart-spawning-method). You must turn off smart spawning, or else your application will freeze as soon Ruby tries to access the Java bridge.
-
-Below is an example of a simple Nginx virtual host configuration (note the use of `passenger_spawn_method`):
-
-```nginx
-server {
-    server_name my-rails-app.com;
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    passenger_enabled on;
-    passenger_spawn_method direct;
-    root /home/system/my-rails-app/public;
-}
-```
-
-If you absolutely must have smart spawning, I recommend using `fillable-pdf` as a service that runs independently of your Rails application.
-
-
-## Deployment with Puma + Nginx
-
-In order to use Puma in production, you need to configure a reverse proxy in your Nginx virtual host. Here is simple naive example:
-
-```nginx
-server {
-    server_name my-rails-app.com;
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    location / {
-        proxy_pass http://127.0.0.1:8888;
-        proxy_redirect off;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $http_host;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-Then you'll have to start Puma in production daemon mode as follows:
-
-```bash
-RAILS_ENV=production bin/rails server -p 8888 --daemon
-```
-
-Naturally, there are many downsides (in terms of efficiency, scalability, security, etc) to running your application in production in this manner, so please use the above as an example only.
-
 
 ## Installation
 
-**Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).**
+**Prerequisites:** Java SE Development Kit v8, v11
 
-* OSX: `/Library/Java/JavaVirtualMachines/jdk-12.0.2.jdk/Contents/Home`
-* Ubuntu/CentOS: `/usr/lib/jvm/java-1.8.0-openjdk`
+- Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).**
+
+  * OSX: `/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home`
+  * Ubuntu/CentOS: `/usr/lib/jvm/java-1.8.0-openjdk`
 
 Add this line to your application's Gemfile:
 
@@ -307,6 +250,66 @@ An instance of `FillablePDF` has the following methods at its disposal:
     pdf.close
     # result: document is closed
     ```
+
+
+## Deployment with Heroku
+
+When deploying to Heroku, be sure to install the following build packs (in this order):
+
+```bash
+heroku buildpacks:add heroku/jvm
+heroku buildpacks:add heroku/ruby
+```
+
+## Deployment with Phusion Passenger + Nginx
+
+The way the gem is currently built makes it [fundamentally incompatible](https://github.com/phusion/passenger/issues/223#issuecomment-44504029) with Phusion Passenger's [smart spawning](https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#the-smart-spawning-method). You must turn off smart spawning, or else your application will freeze as soon Ruby tries to access the Java bridge.
+
+Below is an example of a simple Nginx virtual host configuration (note the use of `passenger_spawn_method`):
+
+```nginx
+server {
+    server_name my-rails-app.com;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    passenger_enabled on;
+    passenger_spawn_method direct;
+    root /home/system/my-rails-app/public;
+}
+```
+
+If you absolutely must have smart spawning, I recommend using `fillable-pdf` as a service that runs independently of your Rails application.
+
+## Deployment with Puma + Nginx
+
+In order to use Puma in production, you need to configure a reverse proxy in your Nginx virtual host. Here is simple naive example:
+
+```nginx
+server {
+    server_name my-rails-app.com;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+        proxy_redirect off;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $http_host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+Then you'll have to start Puma in production daemon mode as follows:
+
+```bash
+RAILS_ENV=production bin/rails server -p 8888 --daemon
+```
+
+Naturally, there are many downsides (in terms of efficiency, scalability, security, etc) to running your application in production in this manner, so please use the above as an example only.
+
 
 ## Example
 
