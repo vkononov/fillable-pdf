@@ -23,11 +23,11 @@ class PdfTest < Minitest::Test
   end
 
   def test_that_file_has_editable_fields
-    assert @pdf.any_fields?
+    assert_predicate @pdf, :any_fields?
   end
 
   def test_that_file_has_a_positive_number_of_editable_fields
-    assert @pdf.num_fields.positive?
+    assert_predicate @pdf.num_fields, :positive?
   end
 
   def test_that_hash_can_be_accessed

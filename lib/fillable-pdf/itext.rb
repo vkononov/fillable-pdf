@@ -8,7 +8,7 @@ module ITEXT
     ByteArrayOutputStream = Rjb.import 'com.itextpdf.io.source.ByteArrayOutputStream'
     Canvas = Rjb.import 'com.itextpdf.layout.Canvas'
     Div = Rjb.import 'com.itextpdf.layout.element.Div'
-    HorizontalAlignment = Rjb.import 'com.itextpdf.layout.property.HorizontalAlignment'
+    HorizontalAlignment = Rjb.import 'com.itextpdf.layout.properties.HorizontalAlignment'
     Image = Rjb.import 'com.itextpdf.layout.element.Image'
     ImageDataFactory = Rjb.import 'com.itextpdf.io.image.ImageDataFactory'
     PdfAcroForm = Rjb.import 'com.itextpdf.forms.PdfAcroForm'
@@ -19,6 +19,6 @@ module ITEXT
     PdfReader = Rjb.import 'com.itextpdf.kernel.pdf.PdfReader'
     PdfWriter = Rjb.import 'com.itextpdf.kernel.pdf.PdfWriter'
     Rectangle = Rjb.import 'com.itextpdf.kernel.geom.Rectangle'
-    VerticalAlignment = Rjb.import 'com.itextpdf.layout.property.VerticalAlignment'
+    VerticalAlignment = Rjb.import 'com.itextpdf.layout.properties.VerticalAlignment'
   end
 end
