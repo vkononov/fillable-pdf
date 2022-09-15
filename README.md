@@ -9,16 +9,18 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
 ## Known Issues
 
-1. This gem currently does not work with Phusion Passenger's [smart spawning](https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#the-smart-spawning-method). Please see [Deployment with Phusion Passenger + Nginx](#deployment-with-phusion-passenger--nginx) for more information.
+1. Phusion Passenger's [smart spawning](https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#the-smart-spawning-method) is not supported. Please see [Deployment with Phusion Passenger + Nginx](#deployment-with-phusion-passenger--nginx) for more information.
 
-2. If the gem hangs in `development`, removing the following gems may fix the issue:
+2. Puma workers (process forking) is not supposed due to an [issue](https://github.com/arton/rjb/issues/88) with the [rjb](https://github.com/arton/rjb) gem dependency.
+
+3. If the gem hangs in `development`, removing the following gems may fix the issue:
 
     ```ruby
     gem 'spring'
     gem 'spring-watcher-listen'
     ```
 
-3. Read-only, write-protected or encrypted PDF files are currently not supported.
+4. Read-only, write-protected or encrypted PDF files are currently not supported.
 
 
 ## Installation
