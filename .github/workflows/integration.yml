@@ -26,17 +26,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: '<distribution>'
-          java-version: |
-            8
-            11
-            15
       - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@359bebbc29cbe6c87da6bc9ea3bc930432750108
         with:
           ruby-version: ${{ matrix.ruby-version }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: |
+            8
+            11
+            15
       - name: Install dependencies
         run: bundle install
       - name: Run tests
