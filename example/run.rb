@@ -16,7 +16,7 @@ puts
 
 # setting form fields
 pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
-pdf.set_fields(football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
+pdf.set_fields(football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes', rugby: 'Yes')
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
 pdf.set_field(:language, 'dart') # select a radio button option
@@ -39,7 +39,7 @@ puts "Values: #{pdf.values}"
 puts
 
 # Checking field type
-if pdf.field_type(:football) == Field::BUTTON
+if pdf.field_type(:rugby) == Field::BUTTON
   puts "Field 'football' is of type BUTTON"
 else
   puts "Field 'football' is not of type BUTTON"
@@ -54,8 +54,8 @@ puts "Renamed field 'last_name' to 'surname'"
 puts
 
 # Removing field
-pdf.remove_field :nascar
-puts "Removed field 'nascar'"
+pdf.remove_field :marketing
+puts "Removed field 'marketing'"
 
 # saving the filled out PDF in another file
 pdf.save_as('output.pdf')

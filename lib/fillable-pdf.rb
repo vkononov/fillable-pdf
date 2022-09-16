@@ -89,7 +89,10 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] value the field value
   #
   def set_field(key, value)
-    pdf_field(key).setValue(value.to_s)
+    # we set generate_appearance to false for buttons to ensure that the chosen
+    # appearance for checkboxes (i.e. check, circle, diamond) is not changed
+    generate_appearance = field_type(key) != Field::BUTTON
+    pdf_field(key).setValue(value.to_s, generate_appearance)
   end
 
   ##
