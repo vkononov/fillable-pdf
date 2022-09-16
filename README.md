@@ -137,7 +137,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     ```
 
 * `field_type`
-    *Retrieves the numeric type of a field given its unique field name.*
+    *Retrieves the string type of a field given its unique field name.*
 
     ```ruby
     pdf.field_type(:football)
@@ -148,6 +148,12 @@ An instance of `FillablePDF` has the following methods at its disposal:
     Field::CHOICE ('/Ch')
     Field::SIGNATURE ('/Sig')
     Field::TEXT ('/Tx')
+    ```
+
+    You can check the field type by using:
+
+    ```ruby
+    pdf.field_type(:football) == Field::BUTTON
     ```
 
 * `fields`

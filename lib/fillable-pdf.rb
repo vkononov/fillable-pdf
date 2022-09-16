@@ -57,7 +57,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   end
 
   ##
-  # Retrieves the numeric type of a field given its unique field name.
+  # Retrieves the string type of a field given its unique field name.
   #
   #   @param [String|Symbol] key the field name
   #
