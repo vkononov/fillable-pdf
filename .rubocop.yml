@@ -55,5 +55,8 @@ Style/FrozenStringLiteralComment:
 Style/GuardClause:
   Enabled: false
 
+Style/HashSyntax:
+  Enabled: false
+
 Style/MutableConstant:
   Enabled: false

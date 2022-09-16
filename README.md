@@ -22,6 +22,8 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
 4. Read-only, write-protected or encrypted PDF files are currently not supported.
 
+5. Adobe generated field arrays (i.e. fields with names such as `array.0` or `array.1.0`) are not supported. 
+
 
 ## Installation
 
