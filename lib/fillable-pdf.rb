@@ -240,6 +240,10 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     @pdf_doc.isClosed
   end
 
+  def partial_form_flattening(key)
+    @pdf_form.partialFormFlattening(key)
+  end
+
   private
 
   ##
