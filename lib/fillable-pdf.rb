@@ -87,12 +87,14 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [String|Symbol] key the field name
   #   @param [String|Symbol] value the field value
+  #   @param [NilClass|TrueClass|FalseClass] generate_appearance true to generate appearance, false to let the PDF viewer application generate form field appearance, nil (default) to let iText decide what's appropriate
   #
-  def set_field(key, value)
-    # we set generate_appearance to false for buttons to ensure that the chosen
-    # appearance for checkboxes (i.e. check, circle, diamond) is not changed
-    generate_appearance = field_type(key) != Field::BUTTON
-    pdf_field(key).setValue(value.to_s, generate_appearance)
+  def set_field(key, value, generate_appearance: nil)
+    if generate_appearance.nil?
+      pdf_field(key).setValue(value.to_s)
+    else
+      pdf_field(key).setValue(value.to_s, generate_appearance)
+    end
   end
 
   ##
@@ -157,9 +159,10 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   # Sets the values of multiple fields given a set of unique field names and values.
   #
   #   @param [Hash] fields the set of field names and values
+  #   @param [NilClass|TrueClass|FalseClass] generate_appearance true to generate appearance, false to let the PDF viewer application generate form field appearance,  nil (default) to let iText decide what's appropriate
   #
-  def set_fields(fields)
-    fields.each { |key, value| set_field key, value }
+  def set_fields(fields, generate_appearance: nil)
+    fields.each { |key, value| set_field key, value, generate_appearance: generate_appearance }
   end
 
   ##
@@ -220,7 +223,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   # Saves the filled out PDF document in a given path and flattens it if requested.
   #
   #   @param [String] file_path the name of the PDF file or file path
-  #   @param [Hash] flatten: true if PDF should be flattened, false otherwise
+  #   @param [TrueClass|FalseClass] flatten true if PDF should be flattened, false otherwise
   #
   def save_as(file_path, flatten: false)
     if @file_path == file_path
@@ -245,7 +248,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   ##
   # Writes the contents of the modified fields to the previously opened PDF file.
   #
-  #   @param [Hash] flatten: true if PDF should be flattened, false otherwise
+  #   @param [TrueClass|FalseClass] flatten: true if PDF should be flattened, false otherwise
   #
   def finalize(flatten: false)
     @pdf_form.flattenFields if flatten

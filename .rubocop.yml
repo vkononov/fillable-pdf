@@ -29,6 +29,7 @@ Layout/LineLength:
     - README.md
     - fillable-pdf.gemspec
   Max: 120
+  AllowedPatterns: ['^(\s*#)']
 
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: false
