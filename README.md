@@ -23,8 +23,34 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
 4. Read-only, write-protected or encrypted PDF files are currently not supported.
 
-5. Adobe generated field arrays (i.e. fields with names such as `array.0` or `array.1.0`) are not supported. 
+5. Adobe generated field arrays (i.e. fields with names such as `array.0` or `array.1.0`) are not supported.
 
+
+## Troubleshooting Issues
+
+### Blank Fields
+
+* **Actual Result:**
+
+  ![Blank](images/blank.png)
+
+* **Expected Result:**
+
+  ![Blank](images/checked.png)
+
+If only of the fields are blank, try setting the `generate_appearance` flag to `true` when calling `set_field` or `set_fields`.
+
+### Invalid Checkbox Appearances
+
+* **Actual Result:**
+
+  ![Blank](images/checked.png)
+
+* **Expected Result:**
+
+  ![Blank](images/distinct.png)
+
+If your checkboxes are showing incorrectly, it's likely because iText is overwriting your checkbox appearances. Try setting the `generate_appearance` flag to `false` when calling `set_field` or `set_fields`.
 
 ## Installation
 
@@ -131,19 +157,21 @@ An instance of `FillablePDF` has the following methods at its disposal:
     pdf.num_fields
     ```
 
-* `field`
+* `field(key)`
     *Retrieves the value of a field given its unique field name.*
 
     ```ruby
     pdf.field(:full_name)
+    pdf.field('full_name')
     # output example: 'Richard'
     ```
 
-* `field_type`
+* `field_type(key)`
     *Retrieves the string type of a field given its unique field name.*
 
     ```ruby
     pdf.field_type(:football)
+    pdf.field_type('football')
     # output example: '/Btn'
 
     # list of all field types
@@ -157,6 +185,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
 
     ```ruby
     pdf.field_type(:football) == Field::BUTTON
+    pdf.field_type('football') == Field::BUTTON
     ```
 
 * `fields`
@@ -167,52 +196,71 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # output example: {first_name: "Richard", last_name: "Rahl"}
     ```
 
-* `set_field`
-    *Sets the value of a field given its unique field name and value.*
+* `set_field(key, value, generate_appearance: nil)`
+    *Sets the value of a field given its unique field name and value, with an optional `generate_appearance` directive.*
 
     ```ruby
     pdf.set_field(:first_name, 'Richard')
+    pdf.set_field('first_name', 'Richard')
     # result: changes the value of 'first_name' to 'Richard'
     ```
 
-* `set_fields`
-    *Sets the values of multiple fields given a set of unique field names and values.*
+  Optionally, you can choose to override iText's `generateAppearance` flag to take better control of your field's appearance, using `generate_appearance`. Passing `true` will force the field to generate its own appearance, while setting it to `false` would leave the appearance generation up to the PDF viewer application. Omitting the parameter would allow iText to decide what should happen.
 
     ```ruby
-    pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
+    pdf.set_field(:first_name, 'Richard', generate_appearance: true)
+    pdf.set_field('first_name', 'Richard', generate_appearance: false)
+    ```
+
+* `def set_fields(fields, generate_appearance: nil)`
+    *Sets the values of multiple fields given a set of unique field names and values, with an optional `generate_appearance` directive.*
+
+    ```ruby
+    pdf.set_fields({first_name: 'Richard', last_name: 'Rahl'})
     # result: changes the values of 'first_name' and 'last_name'
     ```
 
-* `set_image`
+  Optionally, you can choose to override iText's `generateAppearance` flag to take better control of your fields' appearance, using `generate_appearance`. Passing `true` will force the field to generate its own appearance, while setting it to `false` would leave the appearance generation up to the PDF viewer application. Omitting the parameter would allow iText to decide what should happen.
+
+    ```ruby
+    pdf.set_fields({first_name: 'Richard', last_name: 'Rahl'}, generate_appearance: true)
+    pdf.set_fields({first_name: 'Richard', last_name: 'Rahl'}, generate_appearance: false)
+    ```
+
+* `set_image(key, file_path)`
   *Places an image file within the rectangular bounding box of the given form field.*
 
     ```ruby
     pdf.set_image(:signature, 'signature.png')
+    pdf.set_image('signature', 'signature.png')
     # result: the image 'signature.png' is shown in the foreground of the form field
     ```
 
-* `set_image_base64`
+* `set_image_base64(key, base64_image_data)`
   *Places a base64 encoded image within the rectangular bounding box of the given form field.*
 
     ```ruby
+    pdf.set_image_base64('signature', 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
     pdf.set_image_base64(:signature, 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
     # result: the base64 encoded image is shown in the foreground of the form field
     ```
 
-* `rename_field`
+* `rename_field(old_key, new_key)`
     *Renames a field given its unique field name and the new field name.*
 
     ```ruby
     pdf.rename_field(:last_name, :surname)
+    pdf.rename_field('last_name', 'surname')
     # result: renames field name 'last_name' to 'surname'
     # NOTE: this action does not take effect until the document is saved
     ```
 
-* `remove_field`
+* `remove_field(key)`
     *Removes a field from the document given its unique field name.*
 
     ```ruby
     pdf.remove_field(:last_name)
+    pdf.remove_field('last_name')
     # result: physically removes field 'last_name' from document
     ```
 
@@ -232,7 +280,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # output example: ["Rahl", "Richard"]
     ```
 
-* `save`
+* `save(flatten: false)`
     *Overwrites the previously opened PDF document and flattens it if requested.*
 
     ```ruby
@@ -242,7 +290,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # result: document is saved with flattening
     ```
 
-* `save_as`
+* `save_as(file_path, flatten: false)`
     *Saves the filled out PDF document in a given path and flattens it if requested.*
 
     ```ruby
@@ -344,8 +392,8 @@ end
 puts
 
 # setting form fields
-pdf.set_fields(first_name: 'Richard', last_name: 'Rahl')
-pdf.set_fields(football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes')
+pdf.set_fields({first_name: 'Richard', last_name: 'Rahl'})
+pdf.set_fields({football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes', rugby: 'Yes'}, generate_appearance: false)
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
 pdf.set_field(:language, 'dart') # select a radio button option
@@ -368,7 +416,7 @@ puts "Values: #{pdf.values}"
 puts
 
 # Checking field type
-if pdf.field_type(:football) == Field::BUTTON
+if pdf.field_type(:rugby) == Field::BUTTON
   puts "Field 'football' is of type BUTTON"
 else
   puts "Field 'football' is not of type BUTTON"
@@ -383,8 +431,8 @@ puts "Renamed field 'last_name' to 'surname'"
 puts
 
 # Removing field
-pdf.remove_field :nascar
-puts "Removed field 'nascar'"
+pdf.remove_field :marketing
+puts "Removed field 'marketing'"
 
 # saving the filled out PDF in another file
 pdf.save_as('output.pdf')
