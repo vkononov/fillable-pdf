@@ -38,7 +38,7 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
   ![Blank](images/checked.png)
 
-If only of the fields are blank, try setting the `generate_appearance` flag to `true` when calling `set_field` or `set_fields`.
+If all of the fields are blank, try setting the `generate_appearance` flag to `true` when calling `set_field` or `set_fields`.
 
 ### Invalid Checkbox Appearances
 
