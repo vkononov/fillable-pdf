@@ -1,8 +1,8 @@
 require_relative 'fillable-pdf/itext'
 require_relative 'field'
 require 'base64'
-require 'fileutils'
 require 'securerandom'
+require 'tmpdir'
 
 class FillablePDF # rubocop:disable Metrics/ClassLength
   ##
@@ -148,7 +148,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] base64_image_data base64 encoded data image
   #
   def set_image_base64(key, base64_image_data)
-    tmp_file = SecureRandom.uuid
+    tmp_file = "#{Dir.tmpdir}/#{SecureRandom.uuid}"
     File.binwrite(tmp_file, Base64.decode64(base64_image_data))
     set_image(key, tmp_file)
   ensure
@@ -214,7 +214,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [bool] flatten true if PDF should be flattened, false otherwise
   #
   def save(flatten: false)
-    tmp_file = SecureRandom.uuid
+    tmp_file = "#{Dir.tmpdir}/#{SecureRandom.uuid}"
     save_as(tmp_file, flatten: flatten)
     FileUtils.mv tmp_file, @file_path
   end
