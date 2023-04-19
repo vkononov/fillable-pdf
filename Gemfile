@@ -4,7 +4,6 @@ gemspec
 
 group :development do
   gem 'rake'
-  gem 'steep'
 
   # Code Linting
   gem 'rubocop', require: false
