@@ -1,9 +1,11 @@
-require_relative 'kernel'
+require_relative 'suppress_warnings'
 require 'rjb'
 
 Rjb.load(Dir.glob(File.expand_path('../../ext/*.jar', __dir__)).join(':'))
 
 module ITEXT
+  extend FillablePDF::SuppressWarnings
+
   suppress_warnings do
     ByteArrayOutputStream = Rjb.import 'com.itextpdf.io.source.ByteArrayOutputStream'
     Canvas = Rjb.import 'com.itextpdf.layout.Canvas'
