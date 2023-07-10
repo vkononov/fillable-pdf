@@ -1,6 +1,6 @@
 require_relative 'fillable-pdf/itext'
 require_relative 'fillable-pdf/suppress_warnings'
-require_relative 'field'
+require_relative 'fillable-pdf/field'
 require 'base64'
 require 'securerandom'
 require 'tmpdir'

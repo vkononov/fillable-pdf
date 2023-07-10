@@ -42,7 +42,7 @@ puts "Values: #{pdf.values}"
 puts
 
 # Checking field type
-if pdf.field_type(:rugby) == Field::BUTTON
+if pdf.field_type(:rugby) == FillablePDF::Field::BUTTON
   puts "Field 'football' is of type BUTTON"
 else
   puts "Field 'football' is not of type BUTTON"

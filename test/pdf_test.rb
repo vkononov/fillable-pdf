@@ -41,8 +41,8 @@ class PdfTest < Minitest::Test
   end
 
   def test_that_a_field_type_can_be_accessed_by_name
-    assert_equal Field::TEXT, @pdf.field_type(:first_name)
-    assert_equal Field::BUTTON, @pdf.field_type(:football)
+    assert_equal FillablePDF::Field::TEXT, @pdf.field_type(:first_name)
+    assert_equal FillablePDF::Field::BUTTON, @pdf.field_type(:football)
   end
 
   def test_that_a_field_value_can_be_modified
