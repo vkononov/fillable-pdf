@@ -1,10 +1,13 @@
 require_relative 'fillable-pdf/itext'
+require_relative 'fillable-pdf/suppress_warnings'
 require_relative 'field'
 require 'base64'
 require 'securerandom'
 require 'tmpdir'
 
 class FillablePDF # rubocop:disable Metrics/ClassLength
+  include SuppressWarnings
+
   ##
   # Opens a given fillable-pdf PDF file and prepares it for modification.
   #
