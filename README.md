@@ -2,7 +2,8 @@
 # FillablePDF
 
 [![Gem Version](https://badge.fury.io/rb/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
-[![Test Status](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions)
+[![Lint Status](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml)
+[![Test Status](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml)
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.
 

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+RESET_COLOR='\033[0m'
+HIGHLIGHT_COLOR='\033[0;35m'
+SUCCESS_COLOR='\033[0;32m'
+ERROR_COLOR='\033[0;31m'
+
+clear
+
+# linter configuration paths
+RUBOCOP_CONFIG=.rubocop.yml
+
+# Checking for existence of configuration files...
+test -e ${RUBOCOP_CONFIG} || { echo -e "${ERROR_COLOR}"ERROR: ${RUBOCOP_CONFIG} not found."${RESET_COLOR}"; exit 1; }
+
+# Running linters
+echo -e "${HIGHLIGHT_COLOR}"Linting Ruby on Rails using RuboCop..."${RESET_COLOR}"
+if [[ "$1" == "--no-fix" ]]; then
+        bundle exec rubocop || { valid=false; }
+else
+        bundle exec rubocop --autocorrect-all  || { valid=false; }
+fi
+
+# Printing summary
+if [[ "$valid" == false ]]; then
+  echo -e "${ERROR_COLOR}"ERROR: Lint errors have been found in your code."${RESET_COLOR}"
+  exit 1
+else
+  echo -e "${SUCCESS_COLOR}"SUCCESS: All lints have completed without errors."${RESET_COLOR}"
+fi
