@@ -1,7 +1,6 @@
 require_relative '../lib/fillable-pdf'
 
 BASE64_PHOTO = 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==' # rubocop:disable Layout/LineLength
-
 # opening a fillable PDF
 pdf = FillablePDF.new('input.pdf')
 
@@ -46,6 +45,17 @@ if pdf.field_type(:rugby) == FillablePDF::Field::BUTTON
   puts "Field 'football' is of type BUTTON"
 else
   puts "Field 'football' is not of type BUTTON"
+end
+
+puts
+
+# Check field type is Radio/Push Button/Checkbox
+if pdf.radio_field?(:language)
+  puts "Field 'language' is a Radio type BUTTON"
+elsif pdf.push_button_field?(:language)
+  puts "Field 'language' is a Push Button type BUTTON"
+else
+  puts "Field 'language' is a Checkbox type BUTTON"
 end
 
 puts

@@ -246,6 +246,19 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # result: the base64 encoded image is shown in the foreground of the form field
     ```
 
+* `radio_field?(key)`
+  *Check if field is a radio button.*
+    ```ruby
+    pdf.radio_field?(:language)
+    ```
+
+* `push_button_field?(key)`
+  *Check if field is a push button.*
+    ```ruby
+    pdf.push_button_field?(:language)
+    # NOTE: IF FIELD IS NEITHER RADIO OR PUSH BUTTON, IT IS CHECKBOX THEN
+    ```
+
 * `rename_field(old_key, new_key)`
     *Renames a field given its unique field name and the new field name.*
 
@@ -431,6 +444,17 @@ puts "Renamed field 'last_name' to 'surname'"
 
 puts
 
+# Check field type is Radio/Push Button/Checkbox
+if pdf.radio_field?(:language)
+  puts "Field 'language' is a Radio type BUTTON"
+elsif pdf.push_button_field?(:language)
+  puts "Field 'language' is a Push Button type BUTTON"
+else
+  puts "Field 'language' is a Checkbox type BUTTON"
+end
+
+puts
+
 # Removing field
 pdf.remove_field :marketing
 puts "Removed field 'marketing'"
@@ -449,19 +473,21 @@ pdf.close
 The example above produces the following output and also generates the output file [output.pdf](example/output.pdf).
 
 ```text
-The form has a total of 16 fields.
+The form has a total of 18 fields.
 
-Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :hockey=>"Yes", :date=>"November 16, 2021", :newsletter=>"Off", :nascar=>"Yes", :language=>"dart", :"language.1"=>"dart", :"language.2"=>"dart", :"language.3"=>"dart", :"language.4"=>"dart", :signature=>"", :photo=>""}
+Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :date=>"August 23, 2023", :newsletter=>"Off", :nascar=>"Yes", :language=>"dart", :"language.1"=>"dart", :"language.2"=>"dart", :"language.3"=>"dart", :"language.4"=>"dart", :signature=>"", :photo=>"", :rugby=>"Yes", :hockey=>"Yes", :marketing=>""}
 
-Keys: [:last_name, :first_name, :football, :baseball, :basketball, :hockey, :date, :newsletter, :nascar, :language, :"language.1", :"language.2", :"language.3", :"language.4", :signature, :photo]
+Keys: [:last_name, :first_name, :football, :baseball, :basketball, :date, :newsletter, :nascar, :language, :"language.1", :"language.2", :"language.3", :"language.4", :signature, :photo, :rugby, :hockey, :marketing]
 
-Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "Yes", "November 16, 2021", "Off", "Yes", "dart", "dart", "dart", "dart", "dart", "", ""]
+Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "August 23, 2023", "Off", "Yes", "dart", "dart", "dart", "dart", "dart", "", "", "Yes", "Yes", ""]
 
 Field 'football' is of type BUTTON
 
+Field 'language' is a Radio type BUTTON
+
 Renamed field 'last_name' to 'surname'
 
-Removed field 'nascar'
+Removed field 'marketing'
 ```
 
 ## Contributing
