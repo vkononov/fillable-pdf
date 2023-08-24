@@ -213,16 +213,16 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
 
   def radio_field?(key)
     field = pdf_field(key)
-    return false unless field && field.respond_to?(:isRadio)
+    return false unless field.respond_to?(:isRadio)
 
-    FillablePDF::Field::BUTTON && field.isRadio()
+    FillablePDF::Field::BUTTON && field.isRadio
   end
 
   def push_button_field?(key)
     field = pdf_field(key)
-    return false unless field && field.respond_to?(:isPushButton)
+    return false unless field.respond_to?(:isPushButton)
 
-    FillablePDF::Field::BUTTON && field.isPushButton()
+    FillablePDF::Field::BUTTON && field.isPushButton
   end
 
   ##
