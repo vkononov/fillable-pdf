@@ -14,5 +14,7 @@ group :development do
 end
 
 group :test do
+  gem 'logger'
   gem 'minitest'
+  gem 'mutex_m'
 end
