@@ -124,7 +124,6 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       widget_dict = suppress_warnings { widgets.isEmpty ? field.getPdfObject : widgets.get(0).getPdfObject }
       orig_rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
 
-      # In iText 8, border width is retrieved differently
       border_style = field.getWidgets.get(0).getBorderStyle
       border_width = border_style.nil? ? 0 : border_style.getWidth
 
