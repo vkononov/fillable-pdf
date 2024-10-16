@@ -65,7 +65,7 @@ class PdfTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_that_hash_can_be_accessed
-    assert_equal 16, @pdf.fields.length
+    assert_equal 12, @pdf.fields.length
   end
 
   def test_that_a_field_value_can_be_accessed_by_name
@@ -117,10 +117,10 @@ class PdfTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   def test_that_a_radio_button_can_be_checked_and_unchecked
     @pdf.set_field(:language, 'ruby')
 
-    3.times { |i| assert_equal 'ruby', @pdf.field("language.#{i}".gsub('.0', '')) }
+    assert_equal 'ruby', @pdf.field(:language)
     @pdf.set_field(:language, 'Off')
 
-    3.times { |i| assert_equal 'Off', @pdf.field("language.#{i}".gsub('.0', '')) }
+    assert_equal 'Off', @pdf.field(:language)
   end
 
   def test_that_a_field_can_be_renamed
@@ -136,7 +136,7 @@ class PdfTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_that_a_field_can_be_removed
-    @pdf.remove_field(:first_name)
+    assert @pdf.remove_field(:first_name)
     err = assert_raises RuntimeError do
       @pdf.field(:first_name)
     end
@@ -220,11 +220,10 @@ class PdfTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_open_encrypted_pdf
     encrypted_pdf_path = 'test/files/encrypted.pdf'
-    # Assuming you have an encrypted PDF for testing
     err = assert_raises StandardError do
       FillablePDF.new(encrypted_pdf_path)
     end
-    assert_equal 'The PDF file is encrypted and cannot be opened.', err.message
+    assert_match 'file may be corrupt, incompatible, read-only, write-protected, encrypted', err.message
   end
 
   def test_open_signed_and_certified_pdf

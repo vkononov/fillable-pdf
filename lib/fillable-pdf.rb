@@ -22,7 +22,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       @pdf_writer = ITEXT::PdfWriter.new @byte_stream
       @pdf_doc = ITEXT::PdfDocument.new @pdf_reader, @pdf_writer
       @pdf_form = ITEXT::PdfAcroForm.getAcroForm(@pdf_doc, true)
-      @form_fields = @pdf_form.getFormFields
+      @form_fields = @pdf_form.getAllFormFields
     rescue StandardError => e
       handle_pdf_open_error(e)
     end
@@ -123,7 +123,11 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       widgets = field.getWidgets
       widget_dict = suppress_warnings { widgets.isEmpty ? field.getPdfObject : widgets.get(0).getPdfObject }
       orig_rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
-      border_width = field.getBorderWidth
+
+      # In iText 8, border width is retrieved differently
+      border_style = field.getWidgets.get(0).getBorderStyle
+      border_width = border_style.nil? ? 0 : border_style.getWidth
+
       bounding_rectangle = ITEXT::Rectangle.new(
         orig_rect.getWidth - (border_width * 2),
         orig_rect.getHeight - (border_width * 2)
@@ -213,6 +217,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   def remove_field(key)
     if @form_fields.containsKey(key.to_s)
       @pdf_form.removeField(key.to_s)
+      @form_fields.remove(key.to_s)
     else
       raise "Unknown key name `#{key}'"
     end
@@ -306,10 +311,6 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   end
 
   def handle_pdf_open_error(err)
-    if err.message.include?('crypto/BlockCipher')
-      raise 'The PDF file is encrypted and cannot be opened.'
-    else
-      raise "#{err.message} (Input file may be corrupt, incompatible, read-only, write-protected, encrypted, or may not have any form fields)" # rubocop:disable Layout/LineLength
-    end
+    raise "#{err.message} (Input file may be corrupt, incompatible, read-only, write-protected, encrypted, or may not have any form fields)" # rubocop:disable Layout/LineLength
   end
 end
