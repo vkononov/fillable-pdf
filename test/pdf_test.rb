@@ -152,6 +152,15 @@ class PdfTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes @pdf.values, 'Test'
   end
 
+  def test_radio_field_identification
+    assert @pdf.radio_field?(:language), 'Expected :language to be identified as a radio button field'
+    refute @pdf.radio_field?(:first_name), 'Expected :first_name not to be identified as a radio button field'
+  end
+
+  def test_push_button_field_identification
+    refute @pdf.push_button_field?(:first_name), 'Expected :first_name not to be identified as a push button field'
+  end
+
   def test_that_a_file_can_be_saved
     @pdf.save_as(@tmp)
 

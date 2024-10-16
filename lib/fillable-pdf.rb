@@ -246,6 +246,20 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     set
   end
 
+  def radio_field?(key)
+    field = pdf_field(key)
+    return false unless field.respond_to?(:isRadio)
+
+    FillablePDF::Field::BUTTON && field.isRadio
+  end
+
+  def push_button_field?(key)
+    field = pdf_field(key)
+    return false unless field.respond_to?(:isPushButton)
+
+    FillablePDF::Field::BUTTON && field.isPushButton
+  end
+
   ##
   # Overwrites the previously opened PDF document and flattens it if requested.
   #
