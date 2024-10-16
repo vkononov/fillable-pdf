@@ -1,14 +1,47 @@
 require 'test_helper'
+require 'tempfile'
 
-class PdfTest < Minitest::Test
+class PdfTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   def setup
-    @pdf = FillablePDF.new 'test/files/filled-out.pdf'
-    @tmp = 'test/files/tmp.pdf'
+    # Path to the original PDF
+    @original_pdf = 'test/files/filled-out.pdf'
+
+    # Create a temporary copy of the original PDF for testing
+    @temp_pdf = Tempfile.new(['filled-out', '.pdf'], 'test/files')
+    FileUtils.cp(@original_pdf, @temp_pdf.path)
+
+    # Initialize FillablePDF with the temporary PDF
+    @pdf = FillablePDF.new(@temp_pdf.path)
+
+    # Temporary file path for saving modifications
+    @tmp = Tempfile.new(['tmp', '.pdf'], 'test/files').path
+
+    # Base64 encoded image data
     @base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+  end
+
+  def teardown
+    # Close the FillablePDF instance
+    @pdf&.close
+
+    # Delete the temporary PDF files
+    @temp_pdf.close!
+    FileUtils.rm_f(@tmp)
   end
 
   def test_that_it_has_a_version_number
     refute_nil FillablePDF::VERSION
+  end
+
+  def test_set_image_base64_with_tempfile
+    Tempfile.create(['image', '.png']) do |_temp|
+      # Use strict_encode64 to avoid newline characters
+      image_data = Base64.strict_encode64(File.read('test/files/signature.png'))
+      @pdf.set_image_base64(:signature, image_data)
+      # Add assertions related to the image being set
+      # Example:
+      assert @pdf.set_image_base64(:signature, image_data)
+    end
   end
 
   def test_that_a_file_is_loaded
@@ -98,7 +131,7 @@ class PdfTest < Minitest::Test
       @pdf.field(:last_name)
     end
 
-    assert_match 'unknown key name', err.message
+    assert_match 'Unknown key name', err.message
     assert_equal 'Test', @pdf.field(:surname)
   end
 
@@ -108,7 +141,7 @@ class PdfTest < Minitest::Test
       @pdf.field(:first_name)
     end
 
-    assert_match 'unknown key name', err.message
+    assert_match 'Unknown key name', err.message
   end
 
   def test_that_field_names_can_be_accessed
@@ -131,5 +164,93 @@ class PdfTest < Minitest::Test
 
   def test_that_a_file_can_be_closed
     assert @pdf.close
+  end
+
+  def test_set_field_with_invalid_key
+    err = assert_raises RuntimeError do
+      @pdf.set_field(:invalid_key, 'Value')
+    end
+    assert_match 'Unknown key name', err.message
+  end
+
+  def test_field_with_invalid_key
+    err = assert_raises RuntimeError do
+      @pdf.field(:invalid_key)
+    end
+    assert_match 'Unknown key name', err.message
+  end
+
+  def test_field_type_with_invalid_key
+    err = assert_raises RuntimeError do
+      @pdf.field_type(:invalid_key)
+    end
+    assert_match 'Unknown key name', err.message
+  end
+
+  def test_set_image_with_invalid_path
+    err = assert_raises IOError do
+      @pdf.set_image(:signature, 'nonexistent.png')
+    end
+    assert_match 'is not found', err.message
+  end
+
+  def test_set_image_base64_with_invalid_data
+    invalid_base64 = 'invalid_base64_data'
+    err = assert_raises ArgumentError do
+      @pdf.set_image_base64(:photo, invalid_base64)
+    end
+    assert_match 'Invalid base64', err.message # Match exact casing
+  end
+
+  def test_save_as_with_same_path
+    assert_silent do
+      @pdf.save_as(@pdf.instance_variable_get(:@file_path))
+    end
+  end
+
+  def test_save_with_flattening
+    @pdf.set_field(:first_name, 'Flattened Name')
+    @pdf.save_as(@tmp, flatten: true)
+    reloaded_pdf = FillablePDF.new(@tmp)
+    assert_raises(RuntimeError) { reloaded_pdf.field(:first_name) }
+    assert_equal 0, reloaded_pdf.num_fields
+  ensure
+    reloaded_pdf&.close
+  end
+
+  def test_open_encrypted_pdf
+    encrypted_pdf_path = 'test/files/encrypted.pdf'
+    # Assuming you have an encrypted PDF for testing
+    err = assert_raises StandardError do
+      FillablePDF.new(encrypted_pdf_path)
+    end
+    assert_equal 'The PDF file is encrypted and cannot be opened.', err.message
+  end
+
+  def test_open_signed_and_certified_pdf
+    encrypted_pdf_path = 'test/files/signed-and-certified.pdf'
+    # Assuming you have an encrypted PDF for testing
+    pdf = FillablePDF.new(encrypted_pdf_path)
+
+    assert_predicate pdf, :any_fields?
+    pdf.close
+  end
+
+  def test_rename_field_to_existing_name
+    # First, rename :last_name to :surname to create the :surname field
+    @pdf.rename_field(:last_name, :surname)
+
+    # Now, attempt to rename :first_name to :surname, which should raise an error
+    err = assert_raises RuntimeError do
+      @pdf.rename_field(:first_name, :surname)
+    end
+    assert_match "Field name 'surname' already exists", err.message
+  end
+
+  def test_remove_nonexistent_field
+    err = assert_raises RuntimeError do
+      @pdf.remove_field(:nonexistent_field)
+    end
+    assert_match 'Unknown key name', err.message # Use exact case
   end
 end

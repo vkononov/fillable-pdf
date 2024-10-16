@@ -24,7 +24,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       @pdf_form = ITEXT::PdfAcroForm.getAcroForm(@pdf_doc, true)
       @form_fields = @pdf_form.getFormFields
     rescue StandardError => e
-      raise "#{e.message} (Input file may be corrupt, incompatible, read-only, write-protected, encrypted, or may not have any form fields)" # rubocop:disable Layout/LineLength
+      handle_pdf_open_error(e)
     end
   end
 
@@ -67,7 +67,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @return the type of the field
   #
   def field_type(key)
-    pdf_field(key).getFormType.toString
+    pdf_field(key).getFormType&.toString
   end
 
   ##
@@ -93,11 +93,16 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [NilClass|TrueClass|FalseClass] generate_appearance true to generate appearance, false to let the PDF viewer application generate form field appearance, nil (default) to let iText decide what's appropriate
   #
   def set_field(key, value, generate_appearance: nil)
+    validate_input(key, value)
+    field = pdf_field(key)
+
     if generate_appearance.nil?
-      pdf_field(key).setValue(value.to_s)
+      field.setValue(value.to_s)
     else
-      pdf_field(key).setValue(value.to_s, generate_appearance)
+      field.setValue(value.to_s, generate_appearance)
     end
+  rescue StandardError => e
+    raise "Unable to set field '#{key}': #{e.message}"
   end
 
   ##
@@ -110,35 +115,39 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] file_path the name of the image file or image path
   #
   def set_image(key, file_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    # Check if the file exists; raise IOError if it doesn't
     raise IOError, "File <#{file_path}> is not found" unless File.exist?(file_path)
-    field = pdf_field(key)
-    widgets = field.getWidgets
-    widget_dict = suppress_warnings { widgets.isEmpty ? field.getPdfObject : widgets.get(0).getPdfObject }
-    orig_rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
-    border_width = field.getBorderWidth
-    bounding_rectangle = ITEXT::Rectangle.new(
-      orig_rect.getWidth - (border_width * 2),
-      orig_rect.getHeight - (border_width * 2)
-    )
 
-    pdf_form_x_object = ITEXT::PdfFormXObject.new(bounding_rectangle)
-    canvas = ITEXT::Canvas.new(pdf_form_x_object, @pdf_doc)
-    image = ITEXT::Image.new(ITEXT::ImageDataFactory.create(file_path.to_s))
-                        .setAutoScale(true)
-                        .setHorizontalAlignment(ITEXT::HorizontalAlignment.CENTER)
-    container = ITEXT::Div.new
-                          .setMargin(border_width).add(image)
-                          .setVerticalAlignment(ITEXT::VerticalAlignment.MIDDLE)
-                          .setFillAvailableArea(true)
-    canvas.add(container)
-    canvas.close
+    begin
+      field = pdf_field(key)
+      widgets = field.getWidgets
+      widget_dict = suppress_warnings { widgets.isEmpty ? field.getPdfObject : widgets.get(0).getPdfObject }
+      orig_rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
+      border_width = field.getBorderWidth
+      bounding_rectangle = ITEXT::Rectangle.new(
+        orig_rect.getWidth - (border_width * 2),
+        orig_rect.getHeight - (border_width * 2)
+      )
 
-    pdf_dict = ITEXT::PdfDictionary.new
-    widget_dict.put(ITEXT::PdfName.AP, pdf_dict)
-    pdf_dict.put(ITEXT::PdfName.N, pdf_form_x_object.getPdfObject)
-    widget_dict.setModified
-  rescue StandardError => e
-    raise "#{e.message} (there may be something wrong with your image)"
+      pdf_form_x_object = ITEXT::PdfFormXObject.new(bounding_rectangle)
+      canvas = ITEXT::Canvas.new(pdf_form_x_object, @pdf_doc)
+      image = ITEXT::Image.new(ITEXT::ImageDataFactory.create(file_path.to_s))
+                          .setAutoScale(true)
+                          .setHorizontalAlignment(ITEXT::HorizontalAlignment.CENTER)
+      container = ITEXT::Div.new
+                            .setMargin(border_width).add(image)
+                            .setVerticalAlignment(ITEXT::VerticalAlignment.MIDDLE)
+                            .setFillAvailableArea(true)
+      canvas.add(container)
+      canvas.close
+
+      pdf_dict = ITEXT::PdfDictionary.new
+      widget_dict.put(ITEXT::PdfName.AP, pdf_dict)
+      pdf_dict.put(ITEXT::PdfName.N, pdf_form_x_object.getPdfObject)
+      widget_dict.setModified
+    rescue StandardError => e
+      raise "Failed to set image for field '#{key}' (#{e.message})"
+    end
   end
 
   ##
@@ -152,10 +161,16 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   def set_image_base64(key, base64_image_data)
     tmp_file = "#{Dir.tmpdir}/#{SecureRandom.uuid}"
-    File.binwrite(tmp_file, Base64.decode64(base64_image_data))
-    set_image(key, tmp_file)
-  ensure
-    FileUtils.rm tmp_file
+    begin
+      # Use strict_decode64 to ensure invalid Base64 data raises an error
+      decoded_data = Base64.strict_decode64(base64_image_data)
+      File.binwrite(tmp_file, decoded_data)
+      set_image(key, tmp_file)
+    rescue ArgumentError => e
+      raise ArgumentError, "Invalid base64 data: #{e.message}"
+    ensure
+      FileUtils.rm_f(tmp_file)
+    end
   end
 
   ##
@@ -165,7 +180,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [NilClass|TrueClass|FalseClass] generate_appearance true to generate appearance, false to let the PDF viewer application generate form field appearance,  nil (default) to let iText decide what's appropriate
   #
   def set_fields(fields, generate_appearance: nil)
-    fields.each { |key, value| set_field key, value, generate_appearance: generate_appearance }
+    fields.each { |key, value| set_field(key, value, generate_appearance: generate_appearance) }
   end
 
   ##
@@ -175,7 +190,19 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] new_key the field name
   #
   def rename_field(old_key, new_key)
-    pdf_field(old_key).setFieldName(new_key.to_s)
+    old_key = old_key.to_s
+    new_key = new_key.to_s
+
+    raise "Field '#{old_key}' not found" unless @form_fields.containsKey(old_key)
+    raise "Field name '#{new_key}' already exists" if @form_fields.containsKey(new_key)
+
+    field = pdf_field(old_key)
+    field.setFieldName(new_key)
+
+    @form_fields.remove(old_key)
+    @form_fields.put(new_key, field)
+  rescue StandardError => e
+    raise "Unable to rename field '#{old_key}' to '#{new_key}': #{e.message}"
   end
 
   ##
@@ -184,7 +211,11 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] key the field name
   #
   def remove_field(key)
-    @pdf_form.removeField(key.to_s)
+    if @form_fields.containsKey(key.to_s)
+      @pdf_form.removeField(key.to_s)
+    else
+      raise "Unknown key name `#{key}'"
+    end
   end
 
   ##
@@ -234,6 +265,8 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     else
       File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
     end
+  rescue StandardError
+    raise "Failed to save file '#{file_path}'"
   end
 
   ##
@@ -257,11 +290,26 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     @pdf_form.flattenFields if flatten
     close
     @byte_stream.toByteArray
+  rescue StandardError
+    raise 'Failed to finalize document'
   end
 
   def pdf_field(key)
     field = @form_fields.get(key.to_s)
-    raise "unknown key name `#{key}'" if field.nil?
+    raise "Unknown key name `#{key}'" if field.nil?
     field
+  end
+
+  def validate_input(key, value)
+    raise ArgumentError, 'Field name must be a string or symbol' unless key.is_a?(String) || key.is_a?(Symbol)
+    raise ArgumentError, 'Field value cannot be nil' if value.nil?
+  end
+
+  def handle_pdf_open_error(err)
+    if err.message.include?('crypto/BlockCipher')
+      raise 'The PDF file is encrypted and cannot be opened.'
+    else
+      raise "#{err.message} (Input file may be corrupt, incompatible, read-only, write-protected, encrypted, or may not have any form fields)" # rubocop:disable Layout/LineLength
+    end
   end
 end
