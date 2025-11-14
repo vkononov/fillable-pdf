@@ -8,6 +8,7 @@
 /coverage/
 /doc/
 /Gemfile.lock
+/gemfiles/
 /pkg/
 /spec/reports/
 /tmp/
