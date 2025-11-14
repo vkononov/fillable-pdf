@@ -7,6 +7,8 @@
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.
 
+Supports `Ruby >= 2.4.0` with `JDK >= 8`
+
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/vkononov)
 
 ## Known Issues
@@ -55,12 +57,13 @@ If your checkboxes are showing incorrectly, it's likely because iText is overwri
 
 ## Installation
 
-**Prerequisites:** Java SE Development Kit v8, v11
+**Prerequisites:** Java SE Development Kit (JDK)
 
 - Ensure that your `JAVA_HOME` variable is set before installing this gem (see examples below).
 
-  * OSX: `/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home`
-  * Ubuntu/CentOS: `/usr/lib/jvm/java-1.8.0-openjdk`
+  * macOS: `/Library/Java/JavaVirtualMachines/jdk-<version>.jdk/Contents/Home`
+  * Linux: `/usr/lib/jvm/java-<version>-openjdk` or `/usr/lib/jvm/temurin-<version>`
+  * Windows: `C:\Program Files\Java\jdk-<version>`
 
 Add this line to your application's Gemfile:
 
