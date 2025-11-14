@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'base64', '~> 0.2.0'
   spec.add_dependency 'rjb', '~> 1.6.0'
-  spec.requirements << 'JDK 8.x - 11.x'
+  spec.requirements << 'JDK >= 8'
 
   spec.metadata = {
     'rubygems_mfa_required' => 'true'
