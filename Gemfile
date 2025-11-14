@@ -1,6 +1,10 @@
 source 'https://rubygems.org'
 
+# Specify your gem's dependencies in cloudflare-turnstile-rails.gemspec
 gemspec
+
+# A Ruby library for testing your library against different versions of dependencies
+gem 'appraisal'
 
 group :development do
   gem 'rake'
@@ -14,7 +18,5 @@ group :development do
 end
 
 group :test do
-  gem 'logger'
   gem 'minitest'
-  gem 'mutex_m'
 end
