@@ -19,15 +19,15 @@ class PdfWorkflowTest < PdfTestBase
   end
 
   def test_field_manipulation_workflow
-    initial_count = @pdf.num_fields
+    initial_count = @pdf.field_count
 
     @pdf.rename_field(:first_name, :given_name)
 
-    assert_equal initial_count, @pdf.num_fields
+    assert_equal initial_count, @pdf.field_count
 
     @pdf.remove_field(:last_name)
 
-    assert_equal initial_count - 1, @pdf.num_fields
+    assert_equal initial_count - 1, @pdf.field_count
 
     @pdf.set_field(:given_name, 'Modified')
 

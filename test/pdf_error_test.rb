@@ -40,6 +40,6 @@ class PdfErrorTest < PdfTestBase
     end
 
     assert_predicate @pdf, :any_fields?
-    assert_predicate @pdf.num_fields, :positive?
+    assert_predicate @pdf.field_count, :positive?
   end
 end

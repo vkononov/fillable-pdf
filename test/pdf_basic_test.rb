@@ -22,7 +22,7 @@ class PdfBasicTest < PdfTestBase
   end
 
   def test_that_file_has_a_positive_number_of_editable_fields
-    assert_predicate @pdf.num_fields, :positive?
+    assert_predicate @pdf.field_count, :positive?
   end
 
   def test_that_hash_can_be_accessed
@@ -65,5 +65,27 @@ class PdfBasicTest < PdfTestBase
 
     assert_predicate pdf, :any_fields?
     pdf.close
+  end
+
+  def test_closed_predicate
+    refute_predicate @pdf, :closed?
+
+    @pdf.close
+
+    assert_predicate @pdf, :closed?
+  end
+
+  def test_operations_on_closed_document
+    @pdf.close
+
+    assert_raises FillablePDF::FileOperationError do
+      @pdf.set_field(:first_name, 'Test')
+    end
+  end
+
+  def test_num_fields_deprecation
+    assert_output(nil, /DEPRECATION.*num_fields.*field_count/) do
+      @pdf.num_fields
+    end
   end
 end

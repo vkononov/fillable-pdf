@@ -1,26 +1,26 @@
 require_relative 'support/pdf_test_base'
 
 class PdfStateTest < PdfTestBase
-  def test_num_fields_after_removing_field
-    initial_count = @pdf.num_fields
+  def test_field_count_after_removing_field
+    initial_count = @pdf.field_count
     @pdf.remove_field(:first_name)
 
-    assert_equal initial_count - 1, @pdf.num_fields
+    assert_equal initial_count - 1, @pdf.field_count
   end
 
-  def test_num_fields_after_removing_multiple_fields
-    initial_count = @pdf.num_fields
+  def test_field_count_after_removing_multiple_fields
+    initial_count = @pdf.field_count
     @pdf.remove_field(:first_name)
     @pdf.remove_field(:last_name)
 
-    assert_equal initial_count - 2, @pdf.num_fields
+    assert_equal initial_count - 2, @pdf.field_count
   end
 
   def test_any_fields_after_removing_all_fields
     @pdf.names.each { |name| @pdf.remove_field(name) }
 
     refute_predicate @pdf, :any_fields?
-    assert_equal 0, @pdf.num_fields
+    assert_equal 0, @pdf.field_count
   end
 
   def test_fields_hash_after_rename
