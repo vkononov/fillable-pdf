@@ -21,7 +21,7 @@ class PdfSaveTest < PdfTestBase
     @pdf.set_field(:first_name, 'Flattened Name')
     @pdf.save_as(@tmp, flatten: true)
     reloaded_pdf = FillablePDF.new(@tmp)
-    assert_raises(RuntimeError) { reloaded_pdf.field(:first_name) }
+    assert_raises(FillablePDF::FieldNotFoundError) { reloaded_pdf.field(:first_name) }
     assert_equal 0, reloaded_pdf.num_fields
   ensure
     reloaded_pdf&.close

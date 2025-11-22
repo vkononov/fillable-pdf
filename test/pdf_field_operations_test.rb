@@ -44,7 +44,7 @@ class PdfFieldOperationsTest < PdfTestBase
     @pdf.rename_field(:last_name, :surname)
     @pdf.save_as(@tmp)
     @pdf = FillablePDF.new(@tmp)
-    err = assert_raises RuntimeError do
+    err = assert_raises FillablePDF::FieldNotFoundError do
       @pdf.field(:last_name)
     end
 
@@ -55,15 +55,15 @@ class PdfFieldOperationsTest < PdfTestBase
   def test_rename_field_to_existing_name
     @pdf.rename_field(:last_name, :surname)
 
-    err = assert_raises RuntimeError do
+    err = assert_raises FillablePDF::InvalidArgumentError do
       @pdf.rename_field(:first_name, :surname)
     end
-    assert_match "Field name 'surname' already exists", err.message
+    assert_match 'already exists', err.message
   end
 
   def test_that_a_field_can_be_removed
-    assert @pdf.remove_field(:first_name)
-    err = assert_raises RuntimeError do
+    @pdf.remove_field(:first_name)
+    err = assert_raises FillablePDF::FieldNotFoundError do
       @pdf.field(:first_name)
     end
 
@@ -71,7 +71,7 @@ class PdfFieldOperationsTest < PdfTestBase
   end
 
   def test_remove_nonexistent_field
-    err = assert_raises RuntimeError do
+    err = assert_raises FillablePDF::FieldNotFoundError do
       @pdf.remove_field(:nonexistent_field)
     end
     assert_match 'Unknown key name', err.message

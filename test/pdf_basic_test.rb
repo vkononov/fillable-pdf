@@ -10,7 +10,7 @@ class PdfBasicTest < PdfTestBase
   end
 
   def test_that_an_error_is_thrown_for_non_existing_file
-    err = assert_raises IOError do
+    err = assert_raises FillablePDF::FileOperationError do
       @pdf = FillablePDF.new 'test.pdf'
     end
 
