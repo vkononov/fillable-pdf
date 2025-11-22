@@ -17,6 +17,31 @@ class PdfSaveTest < PdfTestBase
     end
   end
 
+  def test_save_as_bang_with_different_path
+    tmp_file = Tempfile.new(['save-as-bang', '.pdf'], 'test/files')
+    tmp_path = tmp_file.path
+    tmp_file.close
+
+    @pdf.set_field(:first_name, 'Bang Test')
+    result = @pdf.save_as!(tmp_path)
+
+    assert_equal @pdf, result
+    reloaded_pdf = FillablePDF.new(tmp_path)
+
+    assert_equal 'Bang Test', reloaded_pdf.field(:first_name)
+  ensure
+    reloaded_pdf&.close
+    FileUtils.rm_f(tmp_path)
+  end
+
+  def test_save_as_bang_raises_error_with_same_path
+    err = assert_raises FillablePDF::InvalidArgumentError do
+      @pdf.save_as!(@pdf.instance_variable_get(:@file_path))
+    end
+    assert_match 'same file path', err.message
+    assert_match 'Use save()', err.message
+  end
+
   def test_save_with_flattening
     @pdf.set_field(:first_name, 'Flattened Name')
     @pdf.save_as(@tmp, flatten: true)
