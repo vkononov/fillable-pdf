@@ -295,7 +295,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     ```
 
 * `save_as(file_path, flatten: false)`
-    *Saves the filled out PDF document in a given path and flattens it if requested.*
+    *Saves the filled out PDF document in a given path and flattens it if requested. If the path matches the current file, calls save() instead.*
 
     ```ruby
     pdf.save_as('output.pdf')
@@ -305,6 +305,16 @@ An instance of `FillablePDF` has the following methods at its disposal:
     ```
 
     **NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy.
+
+* `save_as!(file_path, flatten: false)`
+    *Saves the filled out PDF document in a given path and flattens it if requested. Raises an error if the path matches the current file (use save() instead).*
+
+    ```ruby
+    pdf.save_as!('output.pdf')
+    # result: document is saved in a new path
+    pdf.save_as!(pdf.path)
+    # raises InvalidArgumentError
+    ```
 
 * `close`
     *Closes the PDF document discarding all unsaved changes.*

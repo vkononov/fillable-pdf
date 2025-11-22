@@ -307,6 +307,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
 
   ##
   # Saves the filled out PDF document in a given path and flattens it if requested.
+  # If the path matches the current file path, it will call save() instead.
   #
   #   @param [String] file_path the name of the PDF file or file path
   #   @param [Boolean] flatten true if PDF should be flattened, false otherwise
@@ -322,6 +323,28 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
 
     File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
     self
+  rescue StandardError => e
+    raise FileOperationError, "Failed to save file `#{file_path}`: #{e.message}"
+  end
+
+  ##
+  # Saves the filled out PDF document in a given path and flattens it if requested.
+  # Raises an error if the path matches the current file path (use save() instead).
+  #
+  #   @param [String] file_path the name of the PDF file or file path
+  #   @param [Boolean] flatten true if PDF should be flattened, false otherwise
+  #   @return [self] returns self for method chaining
+  #   @raise [InvalidArgumentError] if file_path matches the current file path
+  #   @raise [FileOperationError] if the save operation fails
+  #
+  def save_as!(file_path, flatten: false)
+    ensure_document_open
+    raise InvalidArgumentError, 'Cannot save_as! to the same file path. Use save() instead.' if @file_path == file_path
+
+    File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+    self
+  rescue InvalidArgumentError
+    raise
   rescue StandardError => e
     raise FileOperationError, "Failed to save file `#{file_path}`: #{e.message}"
   end
