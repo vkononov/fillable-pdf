@@ -1,13 +1,16 @@
 require_relative '../lib/fillable-pdf'
 
+# Get the directory where this script is located
+EXAMPLE_DIR = __dir__
+
 BASE64_PHOTO = 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==' # rubocop:disable Layout/LineLength
 
 # opening a fillable PDF
-pdf = FillablePDF.new('input.pdf')
+pdf = FillablePDF.new(File.join(EXAMPLE_DIR, 'input.pdf'))
 
 # total number of fields
 if pdf.any_fields?
-  puts "The form has a total of #{pdf.num_fields} fields."
+  puts "The form has a total of #{pdf.field_count} fields."
 else
   puts 'The form is not fillable.'
 end
@@ -24,7 +27,7 @@ pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
 pdf.set_field(:language, 'dart') # select a radio button option
 pdf.set_image_base64(:photo, BASE64_PHOTO)
-pdf.set_image(:signature, 'signature.png')
+pdf.set_image(:signature, File.join(EXAMPLE_DIR, 'signature.png'))
 
 # list of fields
 puts "Fields hash: #{pdf.fields}"
@@ -61,11 +64,11 @@ pdf.remove_field :marketing
 puts "Removed field 'marketing'"
 
 # saving the filled out PDF in another file
-pdf.save_as('output.pdf')
+pdf.save_as(File.join(EXAMPLE_DIR, 'output.pdf'))
 
 # saving another copy of the filled out PDF in another file and making it non-editable
-pdf = FillablePDF.new('output.pdf')
-pdf.save_as 'output.flat.pdf', flatten: true
+pdf = FillablePDF.new(File.join(EXAMPLE_DIR, 'output.pdf'))
+pdf.save_as File.join(EXAMPLE_DIR, 'output.flat.pdf'), flatten: true
 
 # closing the document
 pdf.close
