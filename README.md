@@ -153,12 +153,12 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # output example: true
     ```
 
-* `num_fields`
+* `field_count`
     *Returns the total number of fillable form fields.*
 
     ```ruby
+    pdf.field_count
     # output example: 10
-    pdf.num_fields
     ```
 
 * `field(key)`
@@ -295,7 +295,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     ```
 
 * `save_as(file_path, flatten: false)`
-    *Saves the filled out PDF document in a given path and flattens it if requested.*
+    *Saves the filled out PDF document in a given path and flattens it if requested. If the path matches the current file, calls save() instead.*
 
     ```ruby
     pdf.save_as('output.pdf')
@@ -306,12 +306,33 @@ An instance of `FillablePDF` has the following methods at its disposal:
 
     **NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy.
 
+* `save_as!(file_path, flatten: false)`
+    *Saves the filled out PDF document in a given path and flattens it if requested. Raises an error if the path matches the current file (use save() instead).*
+
+    ```ruby
+    pdf.save_as!('output.pdf')
+    # result: document is saved in a new path
+    pdf.save_as!(pdf.path)
+    # raises InvalidArgumentError
+    ```
+
 * `close`
     *Closes the PDF document discarding all unsaved changes.*
 
     ```ruby
     pdf.close
     # result: document is closed
+    ```
+
+* `closed?`
+    *Checks if the PDF document is closed.*
+
+    ```ruby
+    pdf.closed?
+    # output example: false
+    pdf.close
+    pdf.closed?
+    # output example: true
     ```
 
 
@@ -388,7 +409,7 @@ pdf = FillablePDF.new('input.pdf')
 
 # total number of fields
 if pdf.any_fields?
-  puts "The form has a total of #{pdf.num_fields} fields."
+  puts "The form has a total of #{pdf.field_count} fields."
 else
   puts 'The form is not fillable.'
 end
