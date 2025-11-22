@@ -22,7 +22,7 @@ class PdfSaveTest < PdfTestBase
     @pdf.save_as(@tmp, flatten: true)
     reloaded_pdf = FillablePDF.new(@tmp)
     assert_raises(FillablePDF::FieldNotFoundError) { reloaded_pdf.field(:first_name) }
-    assert_equal 0, reloaded_pdf.num_fields
+    assert_equal 0, reloaded_pdf.field_count
   ensure
     reloaded_pdf&.close
   end
@@ -72,7 +72,7 @@ class PdfSaveTest < PdfTestBase
 
     reloaded_pdf = FillablePDF.new(@tmp)
 
-    assert_equal 0, reloaded_pdf.num_fields
+    assert_equal 0, reloaded_pdf.field_count
     refute_predicate reloaded_pdf, :any_fields?
   ensure
     reloaded_pdf&.close
@@ -83,12 +83,12 @@ class PdfSaveTest < PdfTestBase
     tmp_path = tmp_file.path
     tmp_file.close
 
-    initial_count = @pdf.num_fields
+    initial_count = @pdf.field_count
     @pdf.save_as(tmp_path, flatten: false)
 
     reloaded_pdf = FillablePDF.new(tmp_path)
 
-    assert_equal initial_count, reloaded_pdf.num_fields
+    assert_equal initial_count, reloaded_pdf.field_count
   ensure
     reloaded_pdf&.close
     FileUtils.rm_f(tmp_path)

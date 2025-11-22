@@ -15,9 +15,10 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] file_path the name of the PDF file or file path
   #   @raise [FileOperationError] if the file is not found or cannot be opened
   #
-  def initialize(file_path)
+  def initialize(file_path) # rubocop:disable Metrics/MethodLength
     raise FileOperationError, "File <#{file_path}> is not found" unless File.exist?(file_path)
     @file_path = file_path
+    @closed = false
     begin
       @byte_stream = ITEXT::ByteArrayOutputStream.new
       @pdf_reader = ITEXT::PdfReader.new @file_path.to_s
@@ -36,7 +37,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @return [Boolean] true if form has fields, false otherwise
   #
   def any_fields?
-    num_fields.positive?
+    field_count.positive?
   end
 
   ##
@@ -44,8 +45,15 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @return [Integer] the number of fields
   #
-  def num_fields
+  def field_count
     @form_fields.size
+  end
+
+  ##
+  # @deprecated Use {#field_count} instead
+  def num_fields
+    warn '[DEPRECATION] `num_fields` is deprecated. Use `field_count` instead.'
+    field_count
   end
 
   ##
@@ -93,11 +101,12 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] key the field name
   #   @param [String|Symbol] value the field value
   #   @param [Boolean, nil] generate_appearance true to generate appearance, false to let the PDF viewer application generate form field appearance, nil (default) to let iText decide what's appropriate
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [InvalidArgumentError] if key or value are invalid
   #   @raise [FieldNotFoundError] if the field does not exist
   #
   def set_field(key, value, generate_appearance: nil)
+    ensure_document_open
     validate_input(key, value)
     field = pdf_field(key)
 
@@ -106,6 +115,8 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     else
       field.setValue(value.to_s, generate_appearance)
     end
+
+    self
   end
 
   ##
@@ -116,11 +127,12 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [String|Symbol] key the field name
   #   @param [String|Symbol] file_path the name of the image file or image path
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [FileOperationError] if the image file is not found
   #   @raise [FieldNotFoundError] if the field does not exist
   #
   def set_image(key, file_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    ensure_document_open
     raise FileOperationError, "File <#{file_path}> is not found" unless File.exist?(file_path)
 
     begin
@@ -156,6 +168,8 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     rescue StandardError => e
       raise FileOperationError, "Failed to set image for field '#{key}': #{e.message}"
     end
+
+    self
   end
 
   ##
@@ -166,11 +180,12 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [String|Symbol] key the field name
   #   @param [String] base64_image_data base64 encoded image data
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [InvalidArgumentError] if the base64 data is invalid
   #   @raise [FieldNotFoundError] if the field does not exist
   #
   def set_image_base64(key, base64_image_data)
+    ensure_document_open
     tmp_file = "#{Dir.tmpdir}/#{SecureRandom.uuid}"
     begin
       decoded_data = Base64.strict_decode64(base64_image_data)
@@ -181,6 +196,8 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     ensure
       FileUtils.rm_f(tmp_file)
     end
+
+    self
   end
 
   ##
@@ -188,12 +205,14 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [Hash{String, Symbol => String}] fields the set of field names and values
   #   @param [Boolean, nil] generate_appearance true to generate appearance, false to let the PDF viewer application generate form field appearance,  nil (default) to let iText decide what's appropriate
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [InvalidArgumentError] if any key or value is invalid
   #   @raise [FieldNotFoundError] if any field does not exist
   #
   def set_fields(fields, generate_appearance: nil)
+    ensure_document_open
     fields.each { |key, value| set_field(key, value, generate_appearance: generate_appearance) }
+    self
   end
 
   ##
@@ -201,11 +220,15 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [String|Symbol] old_key the current field name
   #   @param [String|Symbol] new_key the new field name
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [FieldNotFoundError] if the field does not exist
   #   @raise [InvalidArgumentError] if the new field name already exists
   #
-  def rename_field(old_key, new_key)
+  def rename_field(old_key, new_key) # rubocop:disable Metrics/MethodLength
+    ensure_document_open
+    validate_field_name(old_key)
+    validate_field_name(new_key)
+
     old_key = old_key.to_s
     new_key = new_key.to_s
 
@@ -217,6 +240,8 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
 
     @form_fields.remove(old_key)
     @form_fields.put(new_key, field)
+
+    self
   rescue FieldNotFoundError, InvalidArgumentError
     raise
   rescue StandardError => e
@@ -227,14 +252,18 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   # Removes a field from the document given its unique field name.
   #
   #   @param [String|Symbol] key the field name
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [FieldNotFoundError] if the field does not exist
   #
   def remove_field(key)
+    ensure_document_open
+    validate_field_name(key)
     raise FieldNotFoundError, "Unknown key name `#{key}'" unless @form_fields.containsKey(key.to_s)
 
     @pdf_form.removeField(key.to_s)
     @form_fields.remove(key.to_s)
+
+    self
   end
 
   ##
@@ -265,13 +294,15 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   # Overwrites the previously opened PDF document and flattens it if requested.
   #
   #   @param [Boolean] flatten true if PDF should be flattened, false otherwise
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [FileOperationError] if the save operation fails
   #
   def save(flatten: false)
+    ensure_document_open
     tmp_file = "#{Dir.tmpdir}/#{SecureRandom.uuid}"
     save_as(tmp_file, flatten: flatten)
     FileUtils.mv tmp_file, @file_path
+    self
   end
 
   ##
@@ -279,15 +310,18 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   #   @param [String] file_path the name of the PDF file or file path
   #   @param [Boolean] flatten true if PDF should be flattened, false otherwise
-  #   @return [void]
+  #   @return [self] returns self for method chaining
   #   @raise [FileOperationError] if the save operation fails
   #
   def save_as(file_path, flatten: false)
+    ensure_document_open
     if @file_path == file_path
       save(flatten: flatten)
-    else
-      File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+      return self
     end
+
+    File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+    self
   rescue StandardError => e
     raise FileOperationError, "Failed to save file `#{file_path}`: #{e.message}"
   end
@@ -295,11 +329,23 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   ##
   # Closes the PDF document discarding all unsaved changes.
   #
+  # @return [Boolean] true if document is closed
+  #
+  def close # rubocop:disable Naming/PredicateMethod
+    return true if closed?
+
+    @pdf_doc.close
+    @closed = true
+    true
+  end
+
+  ##
+  # Checks if the PDF document is closed.
+  #
   # @return [Boolean] true if document is closed, false otherwise
   #
-  def close
-    @pdf_doc.close
-    @pdf_doc.isClosed
+  def closed?
+    @closed ||= false
   end
 
   private
@@ -325,8 +371,16 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   end
 
   def validate_input(key, value)
-    raise InvalidArgumentError, 'Field name must be a string or symbol' unless key.is_a?(String) || key.is_a?(Symbol)
+    validate_field_name(key)
     raise InvalidArgumentError, 'Field value cannot be nil' if value.nil?
+  end
+
+  def validate_field_name(key)
+    raise InvalidArgumentError, 'Field name must be a string or symbol' unless key.is_a?(String) || key.is_a?(Symbol)
+  end
+
+  def ensure_document_open
+    raise FileOperationError, 'Cannot perform operation on a closed PDF document' if closed?
   end
 
   def handle_pdf_open_error(err)
