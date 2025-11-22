@@ -19,7 +19,7 @@ class PdfImageTest < PdfTestBase
   end
 
   def test_set_image_with_invalid_path
-    err = assert_raises IOError do
+    err = assert_raises FillablePDF::FileOperationError do
       @pdf.set_image(:signature, 'nonexistent.png')
     end
     assert_match 'is not found', err.message
@@ -27,7 +27,7 @@ class PdfImageTest < PdfTestBase
 
   def test_set_image_base64_with_invalid_data
     invalid_base64 = 'invalid_base64_data'
-    err = assert_raises ArgumentError do
+    err = assert_raises FillablePDF::InvalidArgumentError do
       @pdf.set_image_base64(:photo, invalid_base64)
     end
     assert_match 'Invalid base64', err.message

@@ -2,28 +2,28 @@ require_relative 'support/pdf_test_base'
 
 class PdfErrorTest < PdfTestBase
   def test_set_field_with_invalid_key
-    err = assert_raises RuntimeError do
+    err = assert_raises FillablePDF::FieldNotFoundError do
       @pdf.set_field(:invalid_key, 'Value')
     end
     assert_match 'Unknown key name', err.message
   end
 
   def test_field_with_invalid_key
-    err = assert_raises RuntimeError do
+    err = assert_raises FillablePDF::FieldNotFoundError do
       @pdf.field(:invalid_key)
     end
     assert_match 'Unknown key name', err.message
   end
 
   def test_field_type_with_invalid_key
-    err = assert_raises RuntimeError do
+    err = assert_raises FillablePDF::FieldNotFoundError do
       @pdf.field_type(:invalid_key)
     end
     assert_match 'Unknown key name', err.message
   end
 
   def test_continue_after_error
-    assert_raises RuntimeError do
+    assert_raises FillablePDF::FieldNotFoundError do
       @pdf.field(:nonexistent)
     end
 
@@ -34,7 +34,7 @@ class PdfErrorTest < PdfTestBase
 
   def test_multiple_errors_dont_corrupt_state
     3.times do
-      assert_raises RuntimeError do
+      assert_raises FillablePDF::FieldNotFoundError do
         @pdf.field(:nonexistent)
       end
     end
