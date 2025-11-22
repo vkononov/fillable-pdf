@@ -103,6 +103,18 @@ pdf = FillablePDF.new 'input.pdf'
 pdf.close
 ```
 
+### Method Chaining
+
+All setter methods return `self`, allowing you to chain operations:
+
+```ruby
+pdf.set_field(:first_name, 'Richard')
+   .set_field(:last_name, 'Rahl')
+   .set_field(:date, Time.now.strftime('%B %e, %Y'))
+   .save
+   .close
+```
+
 ### Checking / Unchecking Checkboxes
 
 Use the values `'Yes'` and `'Off'` to check and uncheck checkboxes, respectively. For example:
@@ -290,7 +302,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     ```ruby
     pdf.save
     # result: document is saved without flattening
-    pdf.save_as(flatten: true)
+    pdf.save(flatten: true)
     # result: document is saved with flattening
     ```
 
@@ -335,6 +347,48 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # output example: true
     ```
 
+## Error Handling
+
+The gem raises custom error classes for different error conditions, making it easier to catch specific problems:
+
+```ruby
+begin
+  pdf = FillablePDF.new('input.pdf')
+  pdf.field(:nonexistent_field)
+rescue FillablePDF::FieldNotFoundError => e
+  puts "Field not found: #{e.message}"
+rescue FillablePDF::InvalidArgumentError => e
+  puts "Invalid input: #{e.message}"
+rescue FillablePDF::FileOperationError => e
+  puts "File error: #{e.message}"
+rescue FillablePDF::Error => e
+  puts "General error: #{e.message}"
+end
+```
+
+### Error Classes
+
+- **`FillablePDF::Error`** - Base class for all gem errors
+- **`FillablePDF::FieldNotFoundError`** - Raised when a field doesn't exist in the PDF
+- **`FillablePDF::InvalidArgumentError`** - Raised when invalid arguments are provided
+- **`FillablePDF::FileOperationError`** - Raised when file operations fail (file not found, cannot save, etc.)
+
+### Common Error Scenarios
+
+```ruby
+# Field doesn't exist
+pdf.field(:nonexistent) # raises FieldNotFoundError
+
+# Invalid input
+pdf.set_field(:name, nil) # raises InvalidArgumentError
+
+# File not found
+pdf = FillablePDF.new('missing.pdf') # raises FileOperationError
+
+# Operations on closed document
+pdf.close
+pdf.set_field(:name, 'test') # raises FileOperationError
+```
 
 ## Deployment with Heroku
 
