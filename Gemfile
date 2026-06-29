@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in cloudflare-turnstile-rails.gemspec
+# Specify your gem's dependencies in fillable-pdf.gemspec
 gemspec
 
 # A Ruby library for testing your library against different versions of dependencies

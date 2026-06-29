@@ -191,10 +191,10 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # output example: '/Btn'
 
     # list of all field types
-    FillablePDF::Field::BUTTON ('/Btn')
-    FillablePDF::Field::CHOICE ('/Ch')
-    FillablePDF::Field::SIGNATURE ('/Sig')
-    FillablePDF::Field::TEXT ('/Tx')
+    FillablePDF::Field::BUTTON # => '/Btn'
+    FillablePDF::Field::CHOICE # => '/Ch'
+    FillablePDF::Field::SIGNATURE # => '/Sig'
+    FillablePDF::Field::TEXT # => '/Tx'
     ```
 
     You can check the field type by using:
