@@ -1,7 +1,8 @@
 
 # FillablePDF
 
-[![Gem Version](https://badge.fury.io/rb/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
+[![Gem Version](https://img.shields.io/gem/v/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Lint Status](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml)
 [![Test Status](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml)
 
