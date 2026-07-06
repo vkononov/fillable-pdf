@@ -12,13 +12,14 @@ Gem::Specification.new do |spec|
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.4.0'
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  gemspec = File.basename(__FILE__)
+  # Ship only what the gem needs at runtime: the library code plus the bundled
+  # iText jars, along with the license and readme. Using an allowlist keeps
+  # tests, tooling, CI config, examples, and readme images out of the package
+  # even as new development files are added over time.
+  root_files = %w[LICENSE.md README.md]
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-    ls.readlines("\x0", chomp: true).reject do |f|
-      (f == gemspec) ||
-        f.start_with?(*%w[bin/ test/ example/ .git .rubocop Appraisals Gemfile Rakefile])
+    ls.readlines("\x0", chomp: true).select do |f|
+      f.start_with?('lib/', 'ext/') || root_files.include?(f)
     end
   end
   spec.bindir = 'exe'
