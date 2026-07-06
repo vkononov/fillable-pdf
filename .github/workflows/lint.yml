@@ -20,3 +20,15 @@ jobs:
           bundler-cache: true
       - name: Run Rubocop
         run: bin/lint --no-fix
+
+  # Single stable status check that summarises the job above, so branch
+  # protection can require one name ("Lint") that survives job changes.
+  lint-result:
+    name: Lint
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if the lint job did not succeed
+        if: needs.test.result != 'success'
+        run: exit 1
