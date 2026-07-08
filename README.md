@@ -1,14 +1,16 @@
 
 # FillablePDF
 
-[![Gem Version](https://img.shields.io/gem/v/fillable-pdf.svg)](https://rubygems.org/gems/fillable-pdf)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Lint Status](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml)
-[![Test Status](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml/badge.svg)](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml)
+[![Gem Version](https://img.shields.io/gem/v/fillable-pdf.svg?label=Gem&logo=rubygems&logoColor=white)](https://rubygems.org/gems/fillable-pdf)
+[![Ruby](https://img.shields.io/badge/Ruby-2.4%20to%204.0-CC342D?logo=ruby&logoColor=white)](https://github.com/vkononov/fillable-pdf/blob/main/.github/workflows/test.yml)
+[![JDK](https://img.shields.io/badge/JDK-8%20to%2026-007396?logo=openjdk&logoColor=white)](https://github.com/vkononov/fillable-pdf/blob/main/.github/workflows/test.yml)
+[![Test Matrix](https://img.shields.io/github/actions/workflow/status/vkononov/fillable-pdf/test.yml?branch=main&label=Test%20Matrix&logo=github)](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml)
+[![Lint](https://img.shields.io/github/actions/workflow/status/vkononov/fillable-pdf/lint.yml?branch=main&label=Lint&logo=github)](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.
 
-Supports `Ruby >= 2.4.0` with `JDK >= 8`
+Supports **Ruby 2.4 → latest** and **JDK 8 → latest**, with the full Ruby/Java matrix tested daily in CI.
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/vkononov)
 
