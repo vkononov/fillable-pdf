@@ -16,7 +16,7 @@ Supports `Ruby >= 2.4.0` with `JDK >= 8`
 
 1. Phusion Passenger's [smart spawning](https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#the-smart-spawning-method) is not supported. Please see [Deployment with Phusion Passenger + Nginx](#deployment-with-phusion-passenger--nginx) for more information.
 
-2. Puma workers (process forking) is not supposed due to an [issue](https://github.com/arton/rjb/issues/88) with the [rjb](https://github.com/arton/rjb) gem dependency.
+2. Puma workers (process forking) is not supported due to an [issue](https://github.com/arton/rjb/issues/88) with the [rjb](https://github.com/arton/rjb) gem dependency.
 
 3. If the gem hangs in `development`, removing the following gems may fix the issue:
 
