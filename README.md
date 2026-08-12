@@ -6,7 +6,7 @@
 [![JDK](https://img.shields.io/badge/JDK-8%20to%2026-007396?logo=openjdk&logoColor=white)](https://github.com/vkononov/fillable-pdf/blob/main/.github/workflows/test.yml)
 [![Test Matrix](https://img.shields.io/github/actions/workflow/status/vkononov/fillable-pdf/test.yml?branch=main&label=Test%20Matrix&logo=github)](https://github.com/vkononov/fillable-pdf/actions/workflows/test.yml)
 [![Lint](https://img.shields.io/github/actions/workflow/status/vkononov/fillable-pdf/lint.yml?branch=main&label=Lint&logo=github)](https://github.com/vkononov/fillable-pdf/actions/workflows/lint.yml)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/MIT)
 
 FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.
 
@@ -231,7 +231,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     pdf.set_field('first_name', 'Richard', generate_appearance: false)
     ```
 
-* `def set_fields(fields, generate_appearance: nil)`
+* `set_fields(fields, generate_appearance: nil)`
     *Sets the values of multiple fields given a set of unique field names and values, with an optional `generate_appearance` directive.*
 
     ```ruby
@@ -319,7 +319,7 @@ An instance of `FillablePDF` has the following methods at its disposal:
     # result: document is saved in a given path with flattening
     ```
 
-    **NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillabePDF` class before making any more changes or saving another copy.
+    **NOTE:** Saving the file automatically closes the input file, so you would need to reinitialize the `FillablePDF` class before making any more changes or saving another copy.
 
 * `save_as!(file_path, flatten: false)`
     *Saves the filled out PDF document in a given path and flattens it if requested. Raises an error if the path matches the current file (use save() instead).*
@@ -454,15 +454,18 @@ Naturally, there are many downsides (in terms of efficiency, scalability, securi
 
 ## Example
 
-The following [example.rb](example/run.rb) with [input.pdf](example/input.pdf) is located in the [example](example) directory. It uses all of the methods that are described above and generates the output files [output.pdf](example/output.pdf) and [output.flat.pdf](example/output.flat.pdf).
+The following [run.rb](example/run.rb) with [input.pdf](example/input.pdf) is located in the [example](example) directory. It uses most of the methods that are described above and generates the output files [output.pdf](example/output.pdf) and [output.flat.pdf](example/output.flat.pdf).
 
 ```ruby
 require_relative '../lib/fillable-pdf'
 
+# Get the directory where this script is located
+EXAMPLE_DIR = __dir__
+
 BASE64_PHOTO = 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==' # rubocop:disable Layout/LineLength
 
 # opening a fillable PDF
-pdf = FillablePDF.new('input.pdf')
+pdf = FillablePDF.new(File.join(EXAMPLE_DIR, 'input.pdf'))
 
 # total number of fields
 if pdf.any_fields?
@@ -475,12 +478,15 @@ puts
 
 # setting form fields
 pdf.set_fields({first_name: 'Richard', last_name: 'Rahl'})
-pdf.set_fields({football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes', rugby: 'Yes'}, generate_appearance: false)
+pdf.set_fields(
+  {football: 'Yes', baseball: 'Yes', basketball: 'Yes', nascar: 'Yes', hockey: 'Yes', rugby: 'Yes'},
+  generate_appearance: false
+)
 pdf.set_field(:date, Time.now.strftime('%B %e, %Y'))
 pdf.set_field(:newsletter, 'Off') # uncheck the checkbox
 pdf.set_field(:language, 'dart') # select a radio button option
 pdf.set_image_base64(:photo, BASE64_PHOTO)
-pdf.set_image(:signature, 'signature.png')
+pdf.set_image(:signature, File.join(EXAMPLE_DIR, 'signature.png'))
 
 # list of fields
 puts "Fields hash: #{pdf.fields}"
@@ -517,11 +523,11 @@ pdf.remove_field :marketing
 puts "Removed field 'marketing'"
 
 # saving the filled out PDF in another file
-pdf.save_as('output.pdf')
+pdf.save_as(File.join(EXAMPLE_DIR, 'output.pdf'))
 
 # saving another copy of the filled out PDF in another file and making it non-editable
-pdf = FillablePDF.new('output.pdf')
-pdf.save_as 'output.flat.pdf', flatten: true
+pdf = FillablePDF.new(File.join(EXAMPLE_DIR, 'output.pdf'))
+pdf.save_as File.join(EXAMPLE_DIR, 'output.flat.pdf'), flatten: true
 
 # closing the document
 pdf.close
@@ -530,19 +536,19 @@ pdf.close
 The example above produces the following output and also generates the output file [output.pdf](example/output.pdf).
 
 ```text
-The form has a total of 16 fields.
+The form has a total of 14 fields.
 
-Fields hash: {:last_name=>"Rahl", :first_name=>"Richard", :football=>"Yes", :baseball=>"Yes", :basketball=>"Yes", :hockey=>"Yes", :date=>"November 16, 2021", :newsletter=>"Off", :nascar=>"Yes", :language=>"dart", :"language.1"=>"dart", :"language.2"=>"dart", :"language.3"=>"dart", :"language.4"=>"dart", :signature=>"", :photo=>""}
+Fields hash: {last_name: "Rahl", first_name: "Richard", football: "Yes", baseball: "Yes", basketball: "Yes", date: "August 12, 2026", newsletter: "Off", nascar: "Yes", language: "dart", signature: "", photo: "", rugby: "Yes", hockey: "Yes", marketing: ""}
 
-Keys: [:last_name, :first_name, :football, :baseball, :basketball, :hockey, :date, :newsletter, :nascar, :language, :"language.1", :"language.2", :"language.3", :"language.4", :signature, :photo]
+Keys: [:last_name, :first_name, :football, :baseball, :basketball, :date, :newsletter, :nascar, :language, :signature, :photo, :rugby, :hockey, :marketing]
 
-Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "Yes", "November 16, 2021", "Off", "Yes", "dart", "dart", "dart", "dart", "dart", "", ""]
+Values: ["Rahl", "Richard", "Yes", "Yes", "Yes", "August 12, 2026", "Off", "Yes", "dart", "", "", "Yes", "Yes", ""]
 
 Field 'football' is of type BUTTON
 
 Renamed field 'last_name' to 'surname'
 
-Removed field 'nascar'
+Removed field 'marketing'
 ```
 
 ## Contributing
@@ -556,6 +562,6 @@ Removed field 'nascar'
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/license/MIT).
 
-However, you must also adhere to the [iText License](https://github.com/itext/itext7) when using this gem in your project.
+However, you must also adhere to the [iText License](https://github.com/itext/itext-java) when using this gem in your project.
