@@ -15,7 +15,7 @@ jobs:
     name: Rubocop
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Set up latest Ruby
         uses: ruby/setup-ruby@v1
         with:
