@@ -6,8 +6,9 @@ Gem::Specification.new do |spec|
   spec.authors = ['Vadim Kononov']
   spec.email = ['vadim@konoson.com']
 
-  spec.summary = 'Fill out or extract field values from simple fillable PDF forms using iText.'
-  spec.description = 'FillablePDF is an extremely simple and lightweight utility that bridges iText and Ruby in order to fill out fillable PDF forms or extract field values from previously filled out PDF forms.'
+  spec.summary = 'Fill, read, flatten and edit PDF form fields in Ruby with the iText engine'
+  spec.description = 'Ruby wrapper for iText to work with AcroForm PDFs. Fill and read text fields, checkboxes and ' \
+                     'radio buttons, add images to fields, rename or remove fields, and flatten forms.'
   spec.homepage = 'https://github.com/vkononov/fillable-pdf'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.4.0'
