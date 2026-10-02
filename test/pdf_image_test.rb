@@ -57,4 +57,27 @@ class PdfImageTest < PdfTestBase
   def test_set_image_base64_with_string_key
     assert @pdf.set_image_base64('photo', @base64)
   end
+
+  def test_set_image_raises_when_field_has_no_rectangle
+    widget_dict(:signature).remove(FillablePDF::ITEXT::PdfName.Rect)
+
+    err = assert_raises FillablePDF::FileOperationError do
+      @pdf.set_image(:signature, 'test/files/signature.png')
+    end
+    assert_match 'no visible area', err.message
+  end
+
+  def test_set_image_works_when_field_has_no_widget_annotation
+    field = @pdf.send(:pdf_field, :photo)
+    field.getPdfObject.remove(FillablePDF::ITEXT::PdfName.Subtype)
+
+    assert_predicate field.getWidgets, :isEmpty
+    assert @pdf.set_image(:photo, 'test/files/signature.png')
+  end
+
+  private
+
+  def widget_dict(key)
+    @pdf.send(:pdf_field, key).getWidgets.get(0).getPdfObject
+  end
 end

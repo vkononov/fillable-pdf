@@ -128,7 +128,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #   @param [String|Symbol] key the field name
   #   @param [String|Symbol] file_path the name of the image file or image path
   #   @return [self] returns self for method chaining
-  #   @raise [FileOperationError] if the image file is not found
+  #   @raise [FileOperationError] if the image file is not found or the field has no visible area
   #   @raise [FieldNotFoundError] if the field does not exist
   #
   def set_image(key, file_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
@@ -136,13 +136,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     raise FileOperationError, "File <#{file_path}> is not found" unless File.exist?(file_path)
 
     begin
-      field = pdf_field(key)
-      widgets = field.getWidgets
-      widget_dict = suppress_warnings { widgets.isEmpty ? field.getPdfObject : widgets.get(0).getPdfObject }
-      orig_rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
-
-      border_style = field.getWidgets.get(0).getBorderStyle
-      border_width = border_style.nil? ? 0 : border_style.getWidth
+      widget_dict, orig_rect, border_width = image_placement(key)
 
       bounding_rectangle = ITEXT::Rectangle.new(
         orig_rect.getWidth - (border_width * 2),
@@ -165,6 +159,8 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
       widget_dict.put(ITEXT::PdfName.AP, pdf_dict)
       pdf_dict.put(ITEXT::PdfName.N, pdf_form_x_object.getPdfObject)
       widget_dict.setModified
+    rescue FileOperationError
+      raise
     rescue StandardError => e
       raise FileOperationError, "Failed to set image for field '#{key}': #{e.message}"
     end
@@ -391,6 +387,20 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
     field = @form_fields.get(key.to_s)
     raise FieldNotFoundError, "Unknown key name `#{key}'" if field.nil?
     field
+  end
+
+  # Dictionary, rectangle and border width of the field's first widget, falling
+  # back to the field itself when it has no widget annotations.
+  def image_placement(key)
+    field = pdf_field(key)
+    widgets = field.getWidgets
+    widget = widgets.isEmpty ? nil : widgets.get(0)
+    widget_dict = suppress_warnings { (widget || field).getPdfObject }
+    rect = widget_dict.getAsRectangle(ITEXT::PdfName.Rect)
+    raise FileOperationError, "Field '#{key}' has no visible area to place an image in" if rect.nil?
+
+    border_style = widget&.getBorderStyle
+    [widget_dict, rect, border_style.nil? ? 0 : border_style.getWidth]
   end
 
   def validate_input(key, value)
