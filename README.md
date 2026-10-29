@@ -12,8 +12,6 @@ FillablePDF is an extremely simple and lightweight utility that bridges iText an
 
 Supports **Ruby 2.4 → latest** and **JDK 8 → latest**, with the full Ruby/Java matrix tested daily in CI.
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/vkononov)
-
 ## Known Issues
 
 1. Phusion Passenger's [smart spawning](https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#the-smart-spawning-method) is not supported. Please see [Deployment with Phusion Passenger + Nginx](#deployment-with-phusion-passenger--nginx) for more information.
