@@ -5,6 +5,7 @@ require_relative 'fillable-pdf/errors'
 require 'base64'
 require 'securerandom'
 require 'tmpdir'
+require 'tempfile'
 
 class FillablePDF # rubocop:disable Metrics/ClassLength
   include SuppressWarnings
@@ -295,15 +296,15 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   def save(flatten: false)
     ensure_document_open
-    tmp_file = "#{Dir.tmpdir}/#{SecureRandom.uuid}"
-    save_as(tmp_file, flatten: flatten)
-    FileUtils.mv tmp_file, @file_path
+    write_document(@file_path, flatten: flatten)
     self
+  rescue StandardError => e
+    raise FileOperationError, "Failed to save file `#{@file_path}`: #{e.message}"
   end
 
   ##
   # Saves the filled out PDF document in a given path and flattens it if requested.
-  # If the path matches the current file path, it will call save() instead.
+  # The destination is replaced only after the document has been finalized.
   #
   #   @param [String] file_path the name of the PDF file or file path
   #   @param [Boolean] flatten true if PDF should be flattened, false otherwise
@@ -312,12 +313,7 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   def save_as(file_path, flatten: false)
     ensure_document_open
-    if @file_path == file_path
-      save(flatten: flatten)
-      return self
-    end
-
-    File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+    write_document(file_path, flatten: flatten)
     self
   rescue StandardError => e
     raise FileOperationError, "Failed to save file `#{file_path}`: #{e.message}"
@@ -335,9 +331,12 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   #
   def save_as!(file_path, flatten: false)
     ensure_document_open
-    raise InvalidArgumentError, 'Cannot save_as! to the same file path. Use save() instead.' if @file_path == file_path
+    if same_source_file?(file_path)
+      raise InvalidArgumentError,
+            'Cannot save_as! to the same file path. Use save() instead.'
+    end
 
-    File.open(file_path, 'wb') { |f| f.write(finalize(flatten: flatten)) && f.close }
+    write_document(file_path, flatten: flatten)
     self
   rescue InvalidArgumentError
     raise
@@ -368,6 +367,28 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   end
 
   private
+
+  def same_source_file?(file_path)
+    File.expand_path(@file_path.to_s) == File.expand_path(file_path.to_s) ||
+      (File.exist?(file_path) && File.identical?(@file_path, file_path))
+  end
+
+  # Keep the existing destination intact until finalization and writing succeed.
+  # Resolve symlinks so saving through one preserves the link itself.
+  def write_document(file_path, flatten:) # rubocop:disable Metrics/AbcSize
+    destination = File.expand_path(file_path.to_s)
+    destination = File.realpath(destination) if File.symlink?(destination)
+    mode = File.stat(destination).mode & 0o777 if File.exist?(destination)
+    Tempfile.create(['.fillable-pdf-', '.pdf'], File.dirname(destination)) do |temporary|
+      temporary.binmode
+      temporary.write(finalize(flatten: flatten))
+      temporary.flush
+      temporary.fsync
+      temporary.chmod(mode) if mode
+      temporary.close
+      File.rename(temporary.path, destination)
+    end
+  end
 
   ##
   # Writes the contents of the modified fields to the previously opened PDF file.
