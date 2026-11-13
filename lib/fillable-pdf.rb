@@ -378,14 +378,15 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
   def write_document(file_path, flatten:)
     destination = File.expand_path(file_path.to_s)
     destination = File.realpath(destination) if File.symlink?(destination)
-    Tempfile.create(['.fillable-pdf-', '.pdf'], File.dirname(destination)) do |temporary|
-      temporary.binmode
-      temporary.write(finalize(flatten: flatten))
-      temporary.flush
-      temporary.fsync
-      temporary.close
-      File.rename(temporary.path, destination)
-    end
+    temporary = Tempfile.new(['.fillable-pdf-', '.pdf'], File.dirname(destination))
+    temporary.binmode
+    temporary.write(finalize(flatten: flatten))
+    temporary.flush
+    temporary.fsync
+    temporary.close
+    File.rename(temporary.path, destination)
+  ensure
+    temporary&.close!
   end
 
   ##
