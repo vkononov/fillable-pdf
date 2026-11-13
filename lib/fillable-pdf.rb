@@ -375,14 +375,16 @@ class FillablePDF # rubocop:disable Metrics/ClassLength
 
   # Keep the existing destination intact until finalization and writing succeed.
   # Resolve symlinks so saving through one preserves the link itself.
-  def write_document(file_path, flatten:)
+  def write_document(file_path, flatten:) # rubocop:disable Metrics/AbcSize
     destination = File.expand_path(file_path.to_s)
     destination = File.realpath(destination) if File.symlink?(destination)
+    mode = File.stat(destination).mode & 0o777 if File.exist?(destination)
     Tempfile.create(['.fillable-pdf-', '.pdf'], File.dirname(destination)) do |temporary|
       temporary.binmode
       temporary.write(finalize(flatten: flatten))
       temporary.flush
       temporary.fsync
+      temporary.chmod(mode) if mode
       temporary.close
       File.rename(temporary.path, destination)
     end
